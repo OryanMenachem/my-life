@@ -118,7 +118,7 @@ function MultiMedia({ slides, flush }) {
           className={`flex overflow-x-auto snap-x snap-mandatory scrollbar-none w-full ${flush ? "" : "rounded-2xl"}`}
           style={{
             aspectRatio: "4/3",
-            touchAction: "pan-y",
+            touchAction: "pan-x",
           }}
           onScroll={handleScroll}
           tabIndex={0}
