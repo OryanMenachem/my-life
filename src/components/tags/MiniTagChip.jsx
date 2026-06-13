@@ -11,7 +11,7 @@ export default function MiniTagChip({ tag, category }) {
   const style = CAT_STYLES[key] ?? CAT_STYLES.general;
   return (
     <span
-      className="inline-flex items-center gap-1 px-[9px] rounded-full text-[10px] font-body font-medium border border-dashed whitespace-nowrap"
+      className="inline-flex items-center gap-[4px] px-[9px] rounded-full text-[10px] font-body font-medium border border-dashed whitespace-nowrap"
       style={{
         height: "22px",
         backgroundColor: style.bg,
@@ -19,6 +19,9 @@ export default function MiniTagChip({ tag, category }) {
         color: style.fg,
       }}
     >
+      {tag.icon && (
+        <span className="text-[10px] leading-none">{tag.icon}</span>
+      )}
       {tag.name_en}
     </span>
   );

@@ -5,7 +5,7 @@ import { formatDuration } from "@/utils/mediaUtils";
  * Shows the first media item on a feed card at 4:3 ratio.
  * Extra items shown as "+N" badge.
  */
-export default function EntryMediaPreview({ media }) {
+export default function EntryMediaPreview({ media, flush = false }) {
   if (!media || media.length === 0) return null;
 
   const first = media[0];
@@ -14,7 +14,10 @@ export default function EntryMediaPreview({ media }) {
   const isVideo = first.type === "video";
 
   return (
-    <div className="relative w-full mt-2.5 rounded-xl overflow-hidden bg-muted" style={{ aspectRatio: "4/3" }}>
+    <div
+      className={`relative w-full overflow-hidden bg-muted ${flush ? "" : "mt-2.5 rounded-xl"}`}
+      style={{ aspectRatio: "4/3" }}
+    >
       {src && (
         <img
           src={src}

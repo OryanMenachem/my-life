@@ -14,35 +14,38 @@ export default function EntryCard({ entry, onClick, onEdit, onDelete, tagById, c
   const visibleIds = tagIds.slice(0, MAX_VISIBLE_TAGS);
   const overflow = tagIds.length - MAX_VISIBLE_TAGS;
 
-  return (
-    <div className="w-full bg-card px-4 pt-3 pb-[13px] relative">
-      {/* Kebab menu — absolute top-right */}
-      <div className="absolute top-3 right-3 z-10">
-        <EntryMenu onEdit={onEdit} onDelete={onDelete} />
-      </div>
+  const hasMedia = entry.media && entry.media.length > 0;
 
-      {/* Meta row */}
-      <div className="flex items-center gap-[6px] mb-0">
+  return (
+    <div className="w-full bg-card relative">
+      {/* ── Full-width media at top (flush, no padding) ── */}
+      {hasMedia && (
+        <EntryMediaPreview media={entry.media} flush />
+      )}
+
+      {/* ── Meta row + kebab menu ── */}
+      <div className={`flex items-center gap-[6px] px-4 ${hasMedia ? "pt-3" : "pt-3"}`}>
         <span className="w-[6px] h-[6px] rounded-full flex-shrink-0" style={{ backgroundColor: "#c79a4f" }} />
         <span className="text-[10.5px] font-body font-semibold tabular-nums" style={{ color: "#8c867c" }}>
           {timeStr}
         </span>
+        {/* Kebab menu pushed to the right */}
+        <div className="ml-auto">
+          <EntryMenu onEdit={onEdit} onDelete={onDelete} />
+        </div>
       </div>
 
-      {/* Content — tappable */}
-      <button onClick={onClick} className="w-full text-left focus:outline-none pr-6">
+      {/* ── Content + tags — tappable ── */}
+      <button onClick={onClick} className="w-full text-left focus:outline-none px-4 pb-[13px]">
         {entry.content ? (
-          <p className="font-heading text-[13.5px] leading-[1.5] py-[5px] pb-[9px]" style={{ color: "#2c2823" }}>
+          <p className="font-heading text-[13.5px] leading-[1.5] pt-[5px] pb-[9px]" style={{ color: "#2c2823" }}>
             {entry.content}
           </p>
         ) : null}
 
-        {/* Media preview */}
-        <EntryMediaPreview media={entry.media} />
-
         {/* Tags */}
         {visibleIds.length > 0 && (
-          <div className="flex flex-wrap gap-[5px] items-center">
+          <div className="flex flex-wrap gap-[5px] items-center mt-1">
             {visibleIds.map((id) => {
               const tag = tagById?.[id];
               if (!tag) return null;
