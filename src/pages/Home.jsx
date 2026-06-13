@@ -171,7 +171,7 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-card border-b border-border relative">
-        <div className="max-w-lg mx-auto px-4 py-2 text-center">
+        <div className="max-w-lg mx-auto px-4 py-3.5 text-center">
           <h1 className="font-heading text-[21px] font-semibold tracking-[-0.5px] text-foreground uppercase">
             MYLIFE
           </h1>
@@ -181,17 +181,10 @@ export default function Home() {
           onClick={() => navigate("/settings")}
           className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full hover:opacity-85 transition-opacity active:scale-95"
           aria-label="Open profile"
-          style={{ minWidth: 38, minHeight: 38 }}
+          style={{ minWidth: 44, minHeight: 44 }}
         >
-          <span
-            className="block rounded-full flex-shrink-0"
-            style={{
-              width: 34,
-              height: 34,
-              boxShadow: "0 0 0 1.5px hsla(var(--foreground), 0.18)",
-            }}
-          >
-            <Avatar avatarUrl={avatarUrl} userName={userName} size={34} />
+          <span className="block rounded-full flex-shrink-0 border-2 border-foreground/12 overflow-hidden" style={{ width: 42, height: 42 }}>
+            <Avatar avatarUrl={avatarUrl} userName={userName} size={42} />
           </span>
         </button>
       </header>
