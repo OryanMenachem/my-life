@@ -6,6 +6,7 @@ import {
 } from "date-fns";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useTagCatalog } from "@/hooks/useTagCatalog";
+import { useLang } from "@/lib/LanguageContext";
 import CalendarGrid from "@/components/calendar/CalendarGrid";
 import DayEntriesPanel from "@/components/calendar/DayEntriesPanel";
 import WriteScreen from "@/components/entries/WriteScreen";
@@ -22,6 +23,9 @@ export default function Calendar() {
 
   const queryClient = useQueryClient();
   const { tagById, categoryByKey } = useTagCatalog();
+  const { lang } = useLang();
+
+  const calendarTitle = lang === "he" ? "לוח שנה" : "Calendar";
 
   // Load entries for the visible month only
   const monthKey = format(month, "yyyy-MM");
@@ -104,7 +108,7 @@ export default function Calendar() {
       <header className="sticky top-0 z-10 bg-card border-b border-border">
         <div className="max-w-lg mx-auto px-4 py-3 text-center">
           <h1 className="font-heading text-[21px] font-semibold tracking-[-0.5px] text-foreground uppercase">
-            לוח שנה
+            {calendarTitle}
           </h1>
         </div>
       </header>
