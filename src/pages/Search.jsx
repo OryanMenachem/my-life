@@ -93,25 +93,23 @@ export default function Search() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Sticky search block — one seamless white card */}
-      <div className="sticky top-0 z-10 bg-background border-b border-border/40">
-        <div className="max-w-lg mx-auto px-4">
-          <div className="bg-card rounded-2xl border border-border/50 shadow-sm px-3 pt-3 pb-2 mt-4 mb-3">
-            <SearchBar
-              query={rawQuery}
-              onChange={setRawQuery}
-              onTimeFilter={() => setTimeSheetOpen(true)}
-              timeFilterActive={timeFilter !== "all"}
-            />
-            <QuickTagChips
-              topTags={topTags}
-              tagById={tagById}
-              categoryByKey={categoryByKey}
-              selectedTagIds={selectedTagIds}
-              onToggleTag={toggleTag}
-              onAllTags={() => setAllTagsOpen(true)}
-            />
-          </div>
+      {/* Sticky search block — flush, matches Composer layout */}
+      <div className="sticky top-0 z-10 bg-card border-b border-border">
+        <div className="max-w-lg mx-auto px-4 pt-4 pb-4 flex flex-col" style={{ minHeight: "auto" }}>
+          <SearchBar
+            query={rawQuery}
+            onChange={setRawQuery}
+            onTimeFilter={() => setTimeSheetOpen(true)}
+            timeFilterActive={timeFilter !== "all"}
+          />
+          <QuickTagChips
+            topTags={topTags}
+            tagById={tagById}
+            categoryByKey={categoryByKey}
+            selectedTagIds={selectedTagIds}
+            onToggleTag={toggleTag}
+            onAllTags={() => setAllTagsOpen(true)}
+          />
         </div>
       </div>
 
