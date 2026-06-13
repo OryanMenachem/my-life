@@ -1,4 +1,6 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
+import { base44 } from "@/api/base44Client";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAllEntries, useFilteredEntriesWithTags } from "@/hooks/useSearchEntries";
 import { useTagCatalog } from "@/hooks/useTagCatalog";
 import { groupEntriesByDay } from "@/utils/groupEntriesByDay";
@@ -9,6 +11,8 @@ import AllTagsSheet from "@/components/search/AllTagsSheet";
 import TimeFilterSheet from "@/components/search/TimeFilterSheet";
 import SearchEmptyState from "@/components/search/SearchEmptyState";
 import EntryDetail from "@/components/entries/EntryDetail";
+import WriteScreen from "@/components/entries/WriteScreen";
+import DeleteConfirmSheet from "@/components/entries/DeleteConfirmSheet";
 import DayGroup from "@/components/entries/DayGroup";
 import { Loader2 } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -25,6 +29,11 @@ export default function Search() {
   const [allTagsOpen, setAllTagsOpen] = useState(false);
   const [timeSheetOpen, setTimeSheetOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
+  const [editingEntry, setEditingEntry] = useState(null);
+  const [deletingEntry, setDeletingEntry] = useState(null);
+  const undoTimerRef = useRef(null);
+
+  const queryClient = useQueryClient();
 
   const query = useDebounce(rawQuery, 180);
 
@@ -99,6 +108,30 @@ export default function Search() {
     setCustomRange(null);
   }, []);
 
+  // ── Edit ────────────────────────────────────────────────────
+  const handleEditSave = (updatedEntry) => {
+    queryClient.invalidateQueries({ queryKey: ["entries"] });
+    setEditingEntry(null);
+  };
+
+  // ── Delete ──────────────────────────────────────────────────
+  const handleDeleteRequest = (entry) => setDeletingEntry(entry);
+
+  const handleDeleteConfirm = () => {
+    const entry = deletingEntry;
+    setDeletingEntry(null);
+    clearTimeout(undoTimerRef.current);
+    undoTimerRef.current = setTimeout(async () => {
+      try {
+        await base44.entities.Entry.delete(entry.id);
+        queryClient.invalidateQueries({ queryKey: ["entries"] });
+      } catch {
+        queryClient.invalidateQueries({ queryKey: ["entries"] });
+      }
+    }, 5000);
+    queryClient.invalidateQueries({ queryKey: ["entries"] });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Sticky search block — unified seamless */}
@@ -172,8 +205,8 @@ export default function Search() {
                    label={group.label}
                    entries={group.entries}
                    onEntryClick={setSelectedEntry}
-                   onEditEntry={() => {}}
-                   onDeleteEntry={() => {}}
+                   onEditEntry={setEditingEntry}
+                   onDeleteEntry={handleDeleteRequest}
                    tagById={tagById}
                    categoryByKey={categoryByKey}
                  />
@@ -210,6 +243,19 @@ export default function Search() {
           onClose={() => setSelectedEntry(null)}
           tagById={tagById}
           categoryByKey={categoryByKey}
+        />
+      )}
+      {editingEntry && (
+        <WriteScreen
+          initialEntry={editingEntry}
+          onSave={handleEditSave}
+          onCancel={() => setEditingEntry(null)}
+        />
+      )}
+      {deletingEntry && (
+        <DeleteConfirmSheet
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setDeletingEntry(null)}
         />
       )}
     </div>
