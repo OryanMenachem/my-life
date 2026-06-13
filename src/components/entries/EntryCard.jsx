@@ -3,13 +3,14 @@ import { getEntryDate } from "@/utils/groupEntriesByDay";
 import MiniTagChip from "@/components/tags/MiniTagChip";
 import EntryMenu from "./EntryMenu";
 import EntryMediaPreview from "./EntryMediaPreview";
+import { highlightText } from "@/utils/searchHighlight";
 
 const MAX_VISIBLE_TAGS = 3;
 
 // Detect if text is primarily Hebrew/RTL
 const isRTL = (text) => /[\u0590-\u05FF\uFB1D-\uFB4F]/.test(text?.slice(0, 60));
 
-export default function EntryCard({ entry, onClick, onEdit, onDelete, tagById, categoryByKey }) {
+export default function EntryCard({ entry, onClick, onEdit, onDelete, tagById, categoryByKey, searchQuery }) {
   const date = getEntryDate(entry);
   const timeStr = format(date, "HH:mm");
 
@@ -51,7 +52,7 @@ export default function EntryCard({ entry, onClick, onEdit, onDelete, tagById, c
               letterSpacing: "0.01em",
             }}
           >
-            {entry.content}
+            {searchQuery ? highlightText(entry.content, searchQuery) : entry.content}
           </p>
         ) : null}
 

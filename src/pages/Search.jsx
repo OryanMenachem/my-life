@@ -214,6 +214,7 @@ export default function Search() {
                   onDeleteEntry={handleDeleteRequest}
                   tagById={tagById}
                   categoryByKey={categoryByKey}
+                  searchQuery={rawQuery}
                 />
               ))}
             </div>

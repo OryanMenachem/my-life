@@ -1,6 +1,6 @@
 import EntryCard from "./EntryCard";
 
-export default function DayGroup({ label, entries, onEntryClick, onEditEntry, onDeleteEntry, tagById, categoryByKey }) {
+export default function DayGroup({ label, entries, onEntryClick, onEditEntry, onDeleteEntry, tagById, categoryByKey, searchQuery }) {
   return (
     <div>
       {/* Day header — "Today · 20 May" split into bold + soft */}
@@ -31,6 +31,7 @@ export default function DayGroup({ label, entries, onEntryClick, onEditEntry, on
               onDelete={() => onDeleteEntry(entry)}
               tagById={tagById}
               categoryByKey={categoryByKey}
+              searchQuery={searchQuery}
             />
           </div>
         ))}
