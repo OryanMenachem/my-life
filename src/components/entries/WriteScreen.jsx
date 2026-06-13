@@ -4,11 +4,17 @@ import { Loader2, Plus, X } from "lucide-react";
 import { useTagCatalog } from "@/hooks/useTagCatalog";
 import TagPickerSheet from "@/components/tags/TagPickerSheet";
 
-export default function WriteScreen({ onSave, onCancel }) {
-  const [text, setText] = useState("");
+/**
+ * Used for both creating (entry=null) and editing (entry=existing).
+ * onSave(savedEntry) is called with the created/updated record.
+ */
+export default function WriteScreen({ onSave, onCancel, entry = null }) {
+  const isEdit = !!entry;
+
+  const [text, setText] = useState(entry?.content ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [selectedTagIds, setSelectedTagIds] = useState([]);
+  const [selectedTagIds, setSelectedTagIds] = useState(entry?.tag_ids ?? []);
   const [pickerOpen, setPickerOpen] = useState(false);
   const textareaRef = useRef(null);
 
@@ -27,21 +33,30 @@ export default function WriteScreen({ onSave, onCancel }) {
     setError("");
     setSaving(true);
     try {
-      let language = "en";
-      try {
-        const me = await base44.auth.me();
-        if (me?.language) language = me.language;
-      } catch {
-        // use default
+      let savedEntry;
+      if (isEdit) {
+        savedEntry = await base44.entities.Entry.update(entry.id, {
+          content: trimmed,
+          tag_ids: selectedTagIds,
+          updated_date: new Date().toISOString(),
+        });
+      } else {
+        let language = "en";
+        try {
+          const me = await base44.auth.me();
+          if (me?.language) language = me.language;
+        } catch {
+          // use default
+        }
+        savedEntry = await base44.entities.Entry.create({
+          content: trimmed,
+          source: "text",
+          entry_date: new Date().toISOString(),
+          language,
+          tag_ids: selectedTagIds,
+        });
       }
-      const newEntry = await base44.entities.Entry.create({
-        content: trimmed,
-        source: "text",
-        entry_date: new Date().toISOString(),
-        language,
-        tag_ids: selectedTagIds,
-      });
-      onSave(newEntry);
+      onSave(savedEntry);
     } catch {
       setError("Couldn't save. Your text is safe — please try again.");
       setSaving(false);
@@ -60,7 +75,9 @@ export default function WriteScreen({ onSave, onCancel }) {
         >
           Cancel
         </button>
-        <span className="text-sm font-body font-semibold text-foreground">New entry</span>
+        <span className="text-sm font-body font-semibold text-foreground">
+          {isEdit ? "Edit entry" : "New entry"}
+        </span>
         <button
           onClick={handleSave}
           disabled={!canSave}

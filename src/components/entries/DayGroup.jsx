@@ -1,6 +1,6 @@
 import EntryCard from "./EntryCard";
 
-export default function DayGroup({ label, entries, onEntryClick, tagById, categoryByKey }) {
+export default function DayGroup({ label, entries, onEntryClick, onEditEntry, onDeleteEntry, tagById, categoryByKey }) {
   return (
     <div>
       {/* Day header */}
@@ -14,7 +14,14 @@ export default function DayGroup({ label, entries, onEntryClick, tagById, catego
       <div className="bg-card rounded-2xl border border-border/50 shadow-sm overflow-hidden">
         {entries.map((entry, i) => (
           <div key={entry.id}>
-            <EntryCard entry={entry} onClick={() => onEntryClick(entry)} tagById={tagById} categoryByKey={categoryByKey} />
+            <EntryCard
+              entry={entry}
+              onClick={() => onEntryClick(entry)}
+              onEdit={() => onEditEntry(entry)}
+              onDelete={() => onDeleteEntry(entry)}
+              tagById={tagById}
+              categoryByKey={categoryByKey}
+            />
             {i < entries.length - 1 && (
               <div className="mx-5 h-px bg-border/50" />
             )}
