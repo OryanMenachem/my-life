@@ -65,6 +65,7 @@ export function useFilteredEntriesWithTags({
   entries = [],
   query = "",
   selectedTagIds = [],
+  contentTypes = [],
   timeFilter = "all",
   customRange = null,
   tagById = {},
@@ -82,6 +83,14 @@ export function useFilteredEntriesWithTags({
       });
     }
 
+    // Content type filter: OR between selected types
+    if (contentTypes.length > 0) {
+      result = result.filter((e) => {
+        const media = e.media || [];
+        return contentTypes.some((ct) => media.some((m) => m.type === ct));
+      });
+    }
+
     // Tag filter: OR within same category, AND across categories
     if (selectedTagIds.length > 0) {
       // Group selected tag IDs by category
@@ -95,7 +104,6 @@ export function useFilteredEntriesWithTags({
       const catEntries = Object.values(catGroups);
       result = result.filter((e) => {
         const entryTags = new Set(e.tag_ids || []);
-        // Every category group must have at least one match (AND across cats)
         return catEntries.every((group) => group.some((tid) => entryTags.has(tid)));
       });
     }
@@ -107,5 +115,5 @@ export function useFilteredEntriesWithTags({
     }
 
     return result;
-  }, [entries, query, selectedTagIds, timeFilter, customRange, tagById]);
+  }, [entries, query, selectedTagIds, contentTypes, timeFilter, customRange, tagById]);
 }

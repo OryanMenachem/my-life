@@ -133,5 +133,22 @@ export function useMediaUploader(initialMedia = []) {
 
   const hasUploading = items.some((it) => it.status === "uploading");
 
-  return { items, addFiles, removeItem, retryItem, readyMedia, hasUploading };
+  const addLinkItem = useCallback(async (url, title, thumbnailUrl) => {
+    const localId = `link_${Date.now()}_${Math.random()}`;
+    setItems((prev) => [
+      ...prev,
+      {
+        _localId: localId,
+        type: "link",
+        url,
+        title: title || "",
+        thumbnail_url: thumbnailUrl || "",
+        sort_order: prev.length,
+        status: "ready",
+      },
+    ]);
+    return localId;
+  }, []);
+
+  return { items, addFiles, addLinkItem, removeItem, retryItem, readyMedia, hasUploading };
 }

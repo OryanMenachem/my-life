@@ -3,6 +3,7 @@ import { getEntryDate } from "@/utils/groupEntriesByDay";
 import MiniTagChip from "@/components/tags/MiniTagChip";
 import EntryMenu from "./EntryMenu";
 import MediaCarousel from "./MediaCarousel";
+import LinkCard from "./LinkCard";
 import { highlightText } from "@/utils/searchHighlight";
 
 const MAX_VISIBLE_TAGS = 3;
@@ -18,17 +19,31 @@ export default function EntryCard({ entry, onClick, onEdit, onDelete, tagById, c
   const visibleIds = tagIds.slice(0, MAX_VISIBLE_TAGS);
   const overflow = tagIds.length - MAX_VISIBLE_TAGS;
 
-  const hasMedia = entry.media && entry.media.length > 0;
+  const allMedia = entry.media || [];
+  const visualMedia = allMedia.filter((m) => m.type !== "link");
+  const linkMedia = allMedia.filter((m) => m.type === "link");
+  const hasMedia = allMedia.length > 0;
+  const hasVisual = visualMedia.length > 0;
+  const hasLinks = linkMedia.length > 0;
 
   return (
     <div className="w-full relative" style={{ backgroundColor: "#FFFFFF" }}>
-      {/* ── Full-width media at top (flush, no padding) ── */}
-      {hasMedia && (
-        <MediaCarousel media={entry.media} flush />
+      {/* ── Full-width visual media at top (flush, no padding) ── */}
+      {hasVisual && (
+        <MediaCarousel media={visualMedia} flush />
+      )}
+
+      {/* ── Link cards ── */}
+      {hasLinks && (
+        <div className={`flex flex-col gap-2 ${hasVisual ? "px-4 pt-4" : "px-4 pt-5"}`}>
+          {linkMedia.map((item, idx) => (
+            <LinkCard key={idx} item={item} />
+          ))}
+        </div>
       )}
 
       {/* ── Meta row + kebab menu ── */}
-      <div className={`flex items-center gap-[6px] px-4 ${hasMedia ? "pt-4" : "pt-5"}`}>
+      <div className={`flex items-center gap-[6px] px-4 ${hasMedia && !hasLinks ? "pt-4" : hasLinks && !hasVisual ? "pt-2" : hasMedia ? "pt-4" : "pt-5"}`}>
         <span className="w-[6px] h-[6px] rounded-full flex-shrink-0" style={{ backgroundColor: "#c79a4f" }} />
         <span className="text-[10.5px] font-body font-semibold tabular-nums" style={{ color: "#8c867c" }}>
           {timeStr}

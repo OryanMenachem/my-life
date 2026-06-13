@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, Plus, X, Trash2, Sun, Moon, Heart, Zap, Wind, Cloud, Briefcase, Users, User, HeartPulse, BookOpen, Home, TreePine, Plane, Lightbulb, Mountain, Star, Crosshair, UtensilsCrossed, GlassWater, Coffee, Waves, Umbrella, Compass, Sailboat, MapPin, Ticket, Leaf, Trees, ShoppingBag, Film, Music, Landmark, Sparkles } from "lucide-react";
+import { Loader2, Plus, X, Trash2, Link as LinkIcon, Sun, Moon, Heart, Zap, Wind, Cloud, Briefcase, Users, User, HeartPulse, BookOpen, Home, TreePine, Plane, Lightbulb, Mountain, Star, Crosshair, UtensilsCrossed, GlassWater, Coffee, Waves, Umbrella, Compass, Sailboat, MapPin, Ticket, Leaf, Trees, ShoppingBag, Film, Music, Landmark, Sparkles } from "lucide-react";
 
 const ICON_MAP = {
   "sun": Sun, "moon": Moon, "heart": Heart, "zap": Zap, "wind": Wind, "cloud": Cloud,
@@ -20,6 +20,7 @@ import { autoTagEntry } from "@/utils/autoTag";
 import TagPickerSheet from "@/components/tags/TagPickerSheet";
 import AutoTagButton from "@/components/tags/AutoTagButton";
 import MediaRow from "./MediaRow";
+import LinkCard from "./LinkCard";
 
 /**
  * Used for both creating (entry=null) and editing (entry=existing).
@@ -36,10 +37,14 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
   const [mediaError, setMediaError] = useState("");
   const [selectedTagIds, setSelectedTagIds] = useState(entry?.tag_ids ?? []);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [showLinkInput, setShowLinkInput] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [linkError, setLinkError] = useState("");
+  const [linkAdding, setLinkAdding] = useState(false);
   const textareaRef = useRef(null);
 
   const { categories, tags, categoryByKey, tagById } = useTagCatalog();
-  const { items: mediaItems, addFiles, removeItem, retryItem, readyMedia, hasUploading } =
+  const { items: mediaItems, addFiles, addLinkItem, removeItem, retryItem, readyMedia, hasUploading } =
     useMediaUploader(entry?.media ?? []);
 
   useEffect(() => {
@@ -55,6 +60,38 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
     setMediaError("");
     const errors = await addFiles(files);
     if (errors.length > 0) setMediaError(errors.join(" "));
+  };
+
+  const handleAddLink = async () => {
+    const url = linkUrl.trim();
+    if (!url) return;
+    // Basic URL validation
+    try {
+      new URL(url);
+    } catch {
+      setLinkError("Please enter a valid URL");
+      return;
+    }
+    setLinkError("");
+    setLinkAdding(true);
+    let title = "";
+    let thumbnailUrl = "";
+    try {
+      // Try to fetch page title and og:image
+      const resp = await fetch(url, { mode: "no-cors" });
+      // no-cors mode won't let us read the response, so just use domain
+    } catch { /* ignore */ }
+    // Use domain as fallback title
+    try {
+      const u = new URL(url);
+      title = u.hostname.replace(/^www\./, "");
+    } catch {
+      title = url;
+    }
+    addLinkItem(url, title, thumbnailUrl);
+    setLinkUrl("");
+    setShowLinkInput(false);
+    setLinkAdding(false);
   };
 
   const handleSave = async () => {
@@ -184,10 +221,38 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
           <MediaRow
             items={mediaItems}
             onAddFiles={handleAddFiles}
+            onAddLink={() => setShowLinkInput(true)}
             onRemove={removeItem}
             onRetry={retryItem}
           />
         </div>
+
+        {/* Link input */}
+        {showLinkInput && (
+          <div className="mt-2 flex gap-2 items-start">
+            <div className="flex-1 flex flex-col gap-1">
+              <input
+                type="url"
+                value={linkUrl}
+                onChange={(e) => { setLinkUrl(e.target.value); setLinkError(""); }}
+                placeholder="Paste a URL..."
+                className="w-full h-9 px-3 rounded-lg border border-border bg-card text-[13px] font-body text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-foreground/30 transition-colors"
+                autoFocus
+                onKeyDown={(e) => { if (e.key === "Enter") handleAddLink(); }}
+              />
+              {linkError && (
+                <span className="text-[11px] font-body text-destructive">{linkError}</span>
+              )}
+            </div>
+            <button
+              onClick={handleAddLink}
+              disabled={linkAdding || !linkUrl.trim()}
+              className="h-9 px-4 rounded-lg bg-foreground text-background text-[12px] font-body font-semibold disabled:opacity-30 transition-opacity active:scale-95"
+            >
+              {linkAdding ? "..." : "Add"}
+            </button>
+          </div>
+        )}
 
         {hasUploading && (
           <p className="text-xs font-body text-muted-foreground mt-1">

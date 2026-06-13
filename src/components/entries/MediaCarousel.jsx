@@ -9,9 +9,11 @@ import { formatDuration } from "@/utils/mediaUtils";
  * - Mixed photo/video: video shows thumbnail + play; plays inline.
  */
 export default function MediaCarousel({ media, flush = false }) {
-  if (!media || media.length === 0) return null;
+  // Only handle photo/video — links render separately
+  const visual = (media || []).filter((m) => m.type !== "link");
+  if (visual.length === 0) return null;
 
-  const slides = [...media].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+  const slides = [...visual].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 
   if (slides.length === 1) {
     return <SingleMedia item={slides[0]} flush={flush} />;

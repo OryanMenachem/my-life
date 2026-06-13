@@ -7,6 +7,7 @@ import { groupEntriesByDay } from "@/utils/groupEntriesByDay";
 import SearchBar from "@/components/search/SearchBar";
 import QuickTagChips from "@/components/search/QuickTagChips";
 import ActiveFilterRow from "@/components/search/ActiveFilterRow";
+import ContentTypeFilter from "@/components/search/ContentTypeFilter";
 import AllTagsSheet from "@/components/search/AllTagsSheet";
 import TimeFilterSheet from "@/components/search/TimeFilterSheet";
 import SearchEmptyState from "@/components/search/SearchEmptyState";
@@ -24,6 +25,7 @@ import {
 export default function Search() {
   const [rawQuery, setRawQuery] = useState("");
   const [selectedTagIds, setSelectedTagIds] = useState([]);
+  const [contentTypes, setContentTypes] = useState([]);
   const [timeFilter, setTimeFilter] = useState("all");
   const [customRange, setCustomRange] = useState(null);
   const [allTagsOpen, setAllTagsOpen] = useState(false);
@@ -77,6 +79,7 @@ export default function Search() {
     entries,
     query,
     selectedTagIds,
+    contentTypes,
     timeFilter,
     customRange,
     tagById,
@@ -92,7 +95,7 @@ export default function Search() {
     return groupEntriesByDay(sorted);
   }, [filtered]);
 
-  const hasFilters = rawQuery.trim() || selectedTagIds.length > 0 || (timeFilter && timeFilter !== "all");
+  const hasFilters = rawQuery.trim() || selectedTagIds.length > 0 || contentTypes.length > 0 || (timeFilter && timeFilter !== "all");
   const showResults = hasFilters;
 
   const toggleTag = useCallback((id) => {
@@ -101,9 +104,16 @@ export default function Search() {
     );
   }, []);
 
+  const toggleContentType = useCallback((type) => {
+    setContentTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+    );
+  }, []);
+
   const clearAll = useCallback(() => {
     setRawQuery("");
     setSelectedTagIds([]);
+    setContentTypes([]);
     setTimeFilter("all");
     setCustomRange(null);
   }, []);
@@ -143,14 +153,20 @@ export default function Search() {
             onTimeFilter={() => setTimeSheetOpen(true)}
             timeFilterActive={timeFilter !== "all"}
           />
-          <QuickTagChips
-            topTags={topTags}
-            tagById={tagById}
-            categoryByKey={categoryByKey}
-            selectedTagIds={selectedTagIds}
-            onToggleTag={toggleTag}
-            onAllTags={() => setAllTagsOpen(true)}
+          <ContentTypeFilter
+            selected={contentTypes}
+            onToggle={toggleContentType}
           />
+          <div className="mt-2">
+            <QuickTagChips
+              topTags={topTags}
+              tagById={tagById}
+              categoryByKey={categoryByKey}
+              selectedTagIds={selectedTagIds}
+              onToggleTag={toggleTag}
+              onAllTags={() => setAllTagsOpen(true)}
+            />
+          </div>
         </div>
       </div>
 
@@ -173,11 +189,13 @@ export default function Search() {
               <ActiveFilterRow
                 query={rawQuery}
                 selectedTagIds={selectedTagIds}
+                contentTypes={contentTypes}
                 timeFilter={timeFilter}
                 tagById={tagById}
                 categoryByKey={categoryByKey}
                 onRemoveQuery={() => setRawQuery("")}
                 onRemoveTag={(id) => setSelectedTagIds((p) => p.filter((x) => x !== id))}
+                onRemoveContentType={(ct) => setContentTypes((p) => p.filter((t) => t !== ct))}
                 onRemoveTime={() => { setTimeFilter("all"); setCustomRange(null); }}
                 onClearAll={clearAll}
               />
@@ -194,11 +212,13 @@ export default function Search() {
               <ActiveFilterRow
                 query={rawQuery}
                 selectedTagIds={selectedTagIds}
+                contentTypes={contentTypes}
                 timeFilter={timeFilter}
                 tagById={tagById}
                 categoryByKey={categoryByKey}
                 onRemoveQuery={() => setRawQuery("")}
                 onRemoveTag={(id) => setSelectedTagIds((p) => p.filter((x) => x !== id))}
+                onRemoveContentType={(ct) => setContentTypes((p) => p.filter((t) => t !== ct))}
                 onRemoveTime={() => { setTimeFilter("all"); setCustomRange(null); }}
                 onClearAll={clearAll}
               />

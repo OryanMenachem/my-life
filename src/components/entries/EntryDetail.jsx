@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import { getEntryDate } from "@/utils/groupEntriesByDay";
 import MiniTagChip from "@/components/tags/MiniTagChip";
 import MediaCarousel from "./MediaCarousel";
+import LinkCard from "./LinkCard";
 
 export default function EntryDetail({ entry, onClose, tagById, categoryByKey }) {
   const date = getEntryDate(entry);
@@ -44,8 +45,17 @@ export default function EntryDetail({ entry, onClose, tagById, categoryByKey }) 
           </p>
         ) : null}
 
-        {/* Media */}
-        <MediaCarousel media={entry.media} />
+        {/* Visual Media */}
+        <MediaCarousel media={(entry.media || []).filter((m) => m.type !== "link")} />
+
+        {/* Link cards */}
+        {(entry.media || []).filter((m) => m.type === "link").length > 0 && (
+          <div className="flex flex-col gap-2 mt-4">
+            {(entry.media || []).filter((m) => m.type === "link").map((item, idx) => (
+              <LinkCard key={idx} item={item} />
+            ))}
+          </div>
+        )}
 
         {/* Tags */}
         {tagIds.length > 0 && (

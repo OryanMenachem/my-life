@@ -46,7 +46,7 @@
     "media": {
       "type": "array",
       "default": [],
-      "description": "Attached photos and videos",
+      "description": "Attached photos, videos and links",
       "items": {
         "type": "object",
         "properties": {
@@ -54,11 +54,16 @@
             "type": "string",
             "enum": [
               "photo",
-              "video"
+              "video",
+              "link"
             ]
           },
           "url": {
             "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "description": "Link title"
           },
           "thumbnail_url": {
             "type": "string"
