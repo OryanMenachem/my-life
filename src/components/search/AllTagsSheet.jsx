@@ -87,6 +87,7 @@ export default function AllTagsSheet({ categories, tags, selectedTagIds, onClose
                       <button
                         key={tag.id}
                         onClick={() => toggle(tag.id)}
+                        title={tag.description || ""}
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-body font-medium border border-dashed whitespace-nowrap transition-all active:scale-95"
                         style={
                           selected

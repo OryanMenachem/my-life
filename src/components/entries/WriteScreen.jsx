@@ -293,6 +293,7 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
                 <button
                   key={id}
                   onClick={() => removeTag(id)}
+                  title={tag.description || ""}
                   className="inline-flex items-center gap-[5px] px-[11px] rounded-full text-[11.5px] font-body font-medium border border-dashed whitespace-nowrap active:scale-95 transition-all"
                   style={{ height: "27px", backgroundColor: s.bg, borderColor: s.bd, color: s.fg }}
                 >
