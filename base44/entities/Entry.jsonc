@@ -29,6 +29,14 @@
         "he"
       ],
       "default": "en"
+    },
+    "tag_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "IDs of selected Tag records"
     }
   },
   "required": [

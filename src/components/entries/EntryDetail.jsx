@@ -1,10 +1,13 @@
 import { format } from "date-fns";
 import { X } from "lucide-react";
 import { getEntryDate } from "@/utils/groupEntriesByDay";
+import MiniTagChip from "@/components/tags/MiniTagChip";
 
-export default function EntryDetail({ entry, onClose }) {
+export default function EntryDetail({ entry, onClose, tagById, categoryByKey }) {
   const date = getEntryDate(entry);
   const fullDateTime = format(date, "EEEE, d MMMM yyyy · HH:mm");
+
+  const tagIds = entry.tag_ids || [];
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col">
@@ -28,6 +31,18 @@ export default function EntryDetail({ entry, onClose }) {
         <p className="font-heading text-[18px] leading-[1.8] text-foreground whitespace-pre-wrap">
           {entry.content}
         </p>
+
+        {/* Tags */}
+        {tagIds.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-6">
+            {tagIds.map((id) => {
+              const tag = tagById?.[id];
+              if (!tag) return null;
+              const cat = categoryByKey?.[tag.category_key];
+              return <MiniTagChip key={id} tag={tag} category={cat} />;
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

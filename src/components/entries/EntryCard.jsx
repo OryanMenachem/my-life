@@ -1,15 +1,10 @@
 import { format } from "date-fns";
 import { getEntryDate } from "@/utils/groupEntriesByDay";
+import MiniTagChip from "@/components/tags/MiniTagChip";
 
-// Deterministic soft color from entry id
 const MOOD_COLORS = [
-  "bg-rose-300",
-  "bg-amber-300",
-  "bg-lime-300",
-  "bg-teal-300",
-  "bg-sky-300",
-  "bg-violet-300",
-  "bg-pink-300",
+  "bg-rose-300", "bg-amber-300", "bg-lime-300",
+  "bg-teal-300", "bg-sky-300", "bg-violet-300", "bg-pink-300",
 ];
 
 function moodColor(id = "") {
@@ -18,10 +13,16 @@ function moodColor(id = "") {
   return MOOD_COLORS[Math.abs(hash) % MOOD_COLORS.length];
 }
 
-export default function EntryCard({ entry, onClick }) {
+const MAX_VISIBLE_TAGS = 3;
+
+export default function EntryCard({ entry, onClick, tagById, categoryByKey }) {
   const date = getEntryDate(entry);
   const timeStr = format(date, "HH:mm");
   const dot = moodColor(entry.id);
+
+  const tagIds = entry.tag_ids || [];
+  const visibleIds = tagIds.slice(0, MAX_VISIBLE_TAGS);
+  const overflow = tagIds.length - MAX_VISIBLE_TAGS;
 
   return (
     <button
@@ -42,6 +43,21 @@ export default function EntryCard({ entry, onClick }) {
       </p>
       {entry.content.length > 160 && (
         <span className="text-xs text-muted-foreground/70 font-body mt-1 inline-block">… more</span>
+      )}
+
+      {/* Tags */}
+      {visibleIds.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-2.5 items-center">
+          {visibleIds.map((id) => {
+            const tag = tagById?.[id];
+            if (!tag) return null;
+            const cat = categoryByKey?.[tag.category_key];
+            return <MiniTagChip key={id} tag={tag} category={cat} />;
+          })}
+          {overflow > 0 && (
+            <span className="text-xs text-muted-foreground font-body">+{overflow}</span>
+          )}
+        </div>
       )}
     </button>
   );

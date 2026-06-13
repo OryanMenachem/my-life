@@ -7,6 +7,7 @@ import EmptyState from "../components/entries/EmptyState";
 import Composer from "../components/entries/Composer";
 import WriteScreen from "../components/entries/WriteScreen";
 import EntryDetail from "../components/entries/EntryDetail";
+import { useTagCatalog } from "@/hooks/useTagCatalog";
 import { Loader2 } from "lucide-react";
 
 export default function Home() {
@@ -19,6 +20,7 @@ export default function Home() {
     queryFn: () => base44.entities.Entry.list("-created_date", 100),
   });
 
+  const { tagById, categoryByKey } = useTagCatalog();
   const groups = groupEntriesByDay(entries);
 
   const handleSave = (newEntry) => {
@@ -60,6 +62,8 @@ export default function Home() {
                 label={group.label}
                 entries={group.entries}
                 onEntryClick={setSelectedEntry}
+                tagById={tagById}
+                categoryByKey={categoryByKey}
               />
             ))}
           </div>
@@ -79,6 +83,8 @@ export default function Home() {
         <EntryDetail
           entry={selectedEntry}
           onClose={() => setSelectedEntry(null)}
+          tagById={tagById}
+          categoryByKey={categoryByKey}
         />
       )}
     </div>
