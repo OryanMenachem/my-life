@@ -145,6 +145,7 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Start writing…"
+          dir={/[\u0590-\u05FF\uFB1D-\uFB4F]/.test(text.slice(0, 60)) ? "rtl" : "ltr"}
           className="w-full min-h-[30vh] resize-none bg-transparent outline-none font-heading text-[18px] leading-[1.75] text-foreground placeholder:text-muted-foreground/40 placeholder:italic"
         />
 

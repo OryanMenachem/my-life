@@ -30,7 +30,11 @@ export default function EntryDetail({ entry, onClose, tagById, categoryByKey }) 
           {fullDateTime}
         </p>
         {entry.content ? (
-          <p className="font-heading text-[18px] leading-[1.8] text-foreground whitespace-pre-wrap">
+          <p
+            className="font-body text-[16px] leading-[1.85] text-foreground whitespace-pre-wrap"
+            dir={/[\u0590-\u05FF\uFB1D-\uFB4F]/.test(entry.content.slice(0, 60)) ? "rtl" : "ltr"}
+            style={{ textAlign: /[\u0590-\u05FF\uFB1D-\uFB4F]/.test(entry.content.slice(0, 60)) ? "right" : "left" }}
+          >
             {entry.content}
           </p>
         ) : null}
