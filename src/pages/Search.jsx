@@ -93,38 +93,23 @@ export default function Search() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Sticky search block — matches Composer structure */}
+      {/* Sticky search block — unified seamless */}
       <div className="sticky top-0 z-10 bg-card border-b border-border">
-        <div className="max-w-lg mx-auto px-4 pt-4 pb-4 flex flex-col" style={{ minHeight: "200px" }}>
-          {/* Time row */}
-          <div className="flex items-center gap-2 mb-4">
-            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: "#cfcabf" }} />
-            <span className="text-xs font-body font-semibold tabular-nums" style={{ color: "#6e685f" }}>
-              Search
-            </span>
-          </div>
-
-          {/* Search input + filters — grows */}
-          <div className="flex-1 flex flex-col mb-3">
-            <SearchBar
-              query={rawQuery}
-              onChange={setRawQuery}
-              onTimeFilter={() => setTimeSheetOpen(true)}
-              timeFilterActive={timeFilter !== "all"}
-            />
-          </div>
-
-          {/* Quick tag chips */}
-          <div className="mb-2">
-            <QuickTagChips
-              topTags={topTags}
-              tagById={tagById}
-              categoryByKey={categoryByKey}
-              selectedTagIds={selectedTagIds}
-              onToggleTag={toggleTag}
-              onAllTags={() => setAllTagsOpen(true)}
-            />
-          </div>
+        <div className="max-w-lg mx-auto px-4 pt-4 pb-3 flex flex-col gap-2">
+          <SearchBar
+            query={rawQuery}
+            onChange={setRawQuery}
+            onTimeFilter={() => setTimeSheetOpen(true)}
+            timeFilterActive={timeFilter !== "all"}
+          />
+          <QuickTagChips
+            topTags={topTags}
+            tagById={tagById}
+            categoryByKey={categoryByKey}
+            selectedTagIds={selectedTagIds}
+            onToggleTag={toggleTag}
+            onAllTags={() => setAllTagsOpen(true)}
+          />
         </div>
       </div>
 

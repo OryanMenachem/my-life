@@ -16,41 +16,55 @@ function moodColor(id = "") {
 
 const MAX_VISIBLE_TAGS = 3;
 
+const isRTL = (text) => /[\u0590-\u05FF\uFB1D-\uFB4F]/.test(text?.slice(0, 60));
+
 export default function SearchResultCard({ entry, query, onClick, tagById, categoryByKey }) {
   const date = getEntryDate(entry);
   const timeStr = format(date, "HH:mm");
-  const dot = moodColor(entry.id);
 
   const tagIds = entry.tag_ids || [];
   const visibleIds = tagIds.slice(0, MAX_VISIBLE_TAGS);
   const overflow = tagIds.length - MAX_VISIBLE_TAGS;
 
+  const hasMedia = entry.media && entry.media.length > 0;
+
   return (
     <button
       onClick={onClick}
-      className="w-full bg-card px-5 py-4 text-left hover:bg-muted/40 active:bg-muted/60 transition-colors focus:outline-none"
+      className="w-full bg-card text-left hover:bg-muted/40 active:bg-muted/60 transition-colors focus:outline-none flex flex-col"
+      style={{ minHeight: "140px", paddingBottom: "14px" }}
     >
-      {/* Meta */}
-      <div className="flex items-center gap-2 mb-2">
-        <span className={`w-2 h-2 rounded-full flex-shrink-0 ${dot}`} />
-        <span className="text-xs font-body font-medium text-muted-foreground tabular-nums">
+      {/* ── Full-width media at top (if present) ── */}
+      {hasMedia && (
+        <EntryMediaPreview media={entry.media} flush />
+      )}
+
+      {/* ── Meta row ── */}
+      <div className={`flex items-center gap-2 ${hasMedia ? "pt-3" : "pt-4"} px-5`}>
+        <span className="w-[6px] h-[6px] rounded-full flex-shrink-0" style={{ backgroundColor: "#c79a4f" }} />
+        <span className="text-[10.5px] font-body font-semibold tabular-nums" style={{ color: "#8c867c" }}>
           {timeStr}
         </span>
       </div>
 
-      {/* Content with highlights */}
+      {/* ── Content with highlights — grows ── */}
       {entry.content ? (
-        <p className="font-heading text-[15px] leading-relaxed text-foreground line-clamp-3">
+        <p
+          className="font-body text-[14.5px] leading-[1.75] px-5 py-[6px] flex-1"
+          style={{
+            color: "#2c2823",
+            direction: isRTL(entry.content) ? "rtl" : "ltr",
+            textAlign: isRTL(entry.content) ? "right" : "left",
+            fontWeight: 400,
+          }}
+        >
           {highlightText(entry.content, query)}
         </p>
       ) : null}
 
-      {/* Media */}
-      <EntryMediaPreview media={entry.media} />
-
-      {/* Tags */}
+      {/* ── Tags ── */}
       {visibleIds.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mt-2.5 items-center">
+        <div className="flex flex-wrap gap-[5px] items-center px-5 mt-1">
           {visibleIds.map((id) => {
             const tag = tagById?.[id];
             if (!tag) return null;
@@ -58,7 +72,7 @@ export default function SearchResultCard({ entry, query, onClick, tagById, categ
             return <MiniTagChip key={id} tag={tag} category={cat} />;
           })}
           {overflow > 0 && (
-            <span className="text-xs text-muted-foreground font-body">+{overflow}</span>
+            <span className="text-[10px] font-body font-semibold" style={{ color: "#8c867c" }}>+{overflow}</span>
           )}
         </div>
       )}
