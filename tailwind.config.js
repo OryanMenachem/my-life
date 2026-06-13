@@ -62,9 +62,9 @@ module.exports = {
   			}
   		},
   		fontFamily: {
-  			heading: ['var(--font-heading)'],
-  			body: ['var(--font-body)'],
-  			display: ['var(--font-display)'],
+  			heading: ['Fraunces', 'serif'],
+  			body: ['Inter', 'sans-serif'],
+  			display: ['Fraunces', 'serif'],
   			mono: ['var(--font-mono)']
   		},
   		keyframes: {

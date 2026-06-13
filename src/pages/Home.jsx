@@ -171,28 +171,24 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border/40">
-        <div className="max-w-lg mx-auto px-5 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-heading font-semibold tracking-tight text-foreground">
-              my<span className="font-light">life</span>
-            </h1>
-          </div>
+      <header className="sticky top-0 z-10 bg-card border-b border-border">
+        <div className="max-w-lg mx-auto px-4 py-2 text-center">
+          <h1 className="font-heading text-[21px] font-semibold tracking-[-0.5px] text-foreground uppercase">
+            MYLIFE
+          </h1>
         </div>
       </header>
 
       {/* Content */}
-      <main className="max-w-lg mx-auto px-5 py-4 flex flex-col gap-1">
-        <div className="mb-2">
-          <Composer onOpen={() => setWriting(true)} />
-        </div>
+      <main className="max-w-lg mx-auto flex flex-col">
+        <Composer onOpen={() => setWriting(true)} />
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-16">
+          <div className="flex items-center justify-center py-16 px-5">
             <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
           </div>
         ) : entries.length === 0 ? (
-          <EmptyState />
+          <div className="px-5 py-8"><EmptyState /></div>
         ) : (
           <div className="flex flex-col">
             {groups.map((group) => (

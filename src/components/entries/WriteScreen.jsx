@@ -166,13 +166,19 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
               const tag = tagById[id];
               if (!tag) return null;
               const cat = categoryByKey[tag.category_key];
-              const color = cat?.color ?? "#888888";
+              const CAT_STYLES = {
+                mood:     { bg: "#f6ecd9", fg: "#946a2b", bd: "#dcc59c" },
+                life:     { bg: "#efe7dc", fg: "#876848", bd: "#d9c4a6" },
+                location: { bg: "#ebe9d7", fg: "#71703e", bd: "#cdc69a" },
+                general:  { bg: "#f1efeb", fg: "#6e685f", bd: "#cfc8ba" },
+              };
+              const s = CAT_STYLES[cat?.system_key ?? "general"] ?? CAT_STYLES.general;
               return (
                 <button
                   key={id}
                   onClick={() => removeTag(id)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-body font-medium border whitespace-nowrap active:scale-95 transition-all"
-                  style={{ backgroundColor: color, borderColor: color, color: "#fff" }}
+                  className="inline-flex items-center gap-[5px] px-[11px] rounded-full text-[11.5px] font-body font-medium border border-dashed whitespace-nowrap active:scale-95 transition-all"
+                  style={{ height: "27px", backgroundColor: s.bg, borderColor: s.bd, color: s.fg }}
                 >
                   {tag.name_en}
                   <X className="w-3 h-3" />
@@ -181,9 +187,10 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
             })}
             <button
               onClick={() => setPickerOpen(true)}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-body font-medium border border-dashed border-muted-foreground/40 text-muted-foreground hover:border-muted-foreground/70 transition-colors whitespace-nowrap"
+              className="inline-flex items-center gap-[5px] px-[11px] rounded-full text-[11.5px] font-body font-semibold border border-dashed whitespace-nowrap transition-colors"
+              style={{ height: "27px", borderColor: "#cfc8ba", color: "#6e685f", background: "#fff" }}
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-3 h-3" />
               tag
             </button>
           </div>
@@ -192,15 +199,16 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
 
       {/* Bottom bar — edit mode only: hint + delete */}
       {isEdit && (
-        <div className="flex items-center justify-between px-5 py-3 border-t border-border/40 flex-shrink-0">
-          <span className="text-xs font-body text-muted-foreground/60">Tap a photo to remove it</span>
+        <div className="flex items-center px-5 pt-3 pb-3 border-t border-border/40 flex-shrink-0">
+          <span className="text-[11px] font-body" style={{ color: "#8c867c" }}>Tap a photo to remove it</span>
           {onDelete && (
             <button
               onClick={onDelete}
-              className="w-8 h-8 flex items-center justify-center rounded-full text-destructive hover:bg-destructive/10 transition-colors"
+              className="ml-auto w-10 h-10 flex items-center justify-center transition-colors"
+              style={{ borderRadius: "11px", background: "#f7eceb", color: "#b1493f" }}
               aria-label="Delete entry"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-[17px] h-[17px]" />
             </button>
           )}
         </div>

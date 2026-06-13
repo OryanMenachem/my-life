@@ -8,11 +8,19 @@ export default function VoiceMicButton({ onClick }) {
   return (
     <button
       onClick={onClick}
-      className="fixed bottom-20 right-6 z-40 w-14 h-14 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform"
-      style={{ backgroundColor: "#171717", color: "#fff" }}
+      className="fixed z-40 rounded-full flex items-center justify-center active:scale-95 transition-transform"
+      style={{
+        bottom: "74px",
+        right: "14px",
+        width: "52px",
+        height: "52px",
+        backgroundColor: "#171717",
+        color: "#fff",
+        boxShadow: "0 6px 18px rgba(0,0,0,0.3)",
+      }}
       aria-label="Record voice entry"
     >
-      <Mic className="w-6 h-6" strokeWidth={2} />
+      <Mic className="w-[22px] h-[22px]" strokeWidth={2} />
     </button>
   );
 }

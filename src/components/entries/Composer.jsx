@@ -9,7 +9,7 @@ const PinIcon = () => (
 
 // Round pencil SVG
 const PencilIcon = () => (
-  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ stroke: "#c08743" }}>
     <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
   </svg>
 );
@@ -20,34 +20,34 @@ export default function Composer({ onOpen }) {
   return (
     <button
       onClick={onOpen}
-      className="w-full text-left bg-card rounded-2xl border border-border/50 shadow-sm px-5 pt-5 pb-4 flex flex-col justify-between transition-all duration-200 hover:shadow-md active:scale-[0.99]"
-      style={{ minHeight: "clamp(180px, 38vh, 260px)" }}
+      className="w-full text-left bg-card border-b border-border px-4 pt-4 pb-4 flex flex-col"
+      style={{ minHeight: "200px" }}
       aria-label="Write a new entry"
     >
       {/* Time row */}
-      <div className="flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full bg-muted-foreground/30 flex-shrink-0" />
-        <span className="text-sm font-body font-medium text-muted-foreground tabular-nums">
+      <div className="flex items-center gap-2 mb-4">
+        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: "#cfcabf" }} />
+        <span className="text-xs font-body font-semibold tabular-nums" style={{ color: "#6e685f" }}>
           {time}
         </span>
-        <span className="text-[10px] font-body font-semibold uppercase tracking-widest text-muted-foreground/60">
+        <span className="text-[10px] font-body font-semibold uppercase tracking-widest" style={{ color: "#8c867c" }}>
           now
         </span>
       </div>
 
       {/* Placeholder */}
-      <p className="font-heading italic text-muted-foreground/50 text-[17px] leading-relaxed flex-1 flex items-center mt-4">
+      <p className="font-heading italic text-[19px] leading-snug flex-1" style={{ color: "#aaa49a" }}>
         What's on your mind right now?
       </p>
 
       {/* Bottom row: straight pin + round pencil button */}
-      <div className="flex items-center justify-between mt-4">
-        <span className="text-muted-foreground/40">
+      <div className="flex items-center justify-between mt-3">
+        <span style={{ color: "#6e685f" }}>
           <PinIcon />
         </span>
         <span
-          className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-          style={{ background: "var(--theme-accent, #C08743)" }}
+          className="w-[34px] h-[34px] rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ background: "#f6ecdd" }}
         >
           <PencilIcon />
         </span>

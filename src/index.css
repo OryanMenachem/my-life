@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,34 +6,34 @@
 
 @layer base {
   :root {
-    --background: 30 25% 97%;
-    --foreground: 240 10% 12%;
+    --background: 36 14% 93%;
+    --foreground: 30 14% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 12%;
+    --card-foreground: 30 14% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 12%;
-    --primary: 24 70% 45%;
+    --popover-foreground: 30 14% 12%;
+    --primary: 33 46% 52%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 30 20% 93%;
-    --secondary-foreground: 240 10% 20%;
-    --muted: 30 15% 94%;
-    --muted-foreground: 240 5% 46%;
-    --accent: 24 50% 92%;
-    --accent-foreground: 24 70% 30%;
-    --destructive: 0 84.2% 60.2%;
+    --secondary: 36 20% 92%;
+    --secondary-foreground: 30 14% 20%;
+    --muted: 36 15% 92%;
+    --muted-foreground: 30 8% 54%;
+    --accent: 36 75% 93%;
+    --accent-foreground: 33 46% 40%;
+    --destructive: 4 55% 47%;
     --destructive-foreground: 0 0% 98%;
-    --border: 30 15% 89%;
-    --input: 30 15% 89%;
-    --ring: 24 70% 45%;
-    --chart-1: 24 70% 45%;
+    --border: 36 12% 92%;
+    --input: 36 12% 92%;
+    --ring: 33 46% 52%;
+    --chart-1: 33 46% 52%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.75rem;
-    --font-heading: 'Playfair Display', serif;
+    --font-heading: 'Fraunces', serif;
     --font-body: 'Inter', sans-serif;
-    --font-display: 'Playfair Display', serif;
+    --font-display: 'Fraunces', serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;

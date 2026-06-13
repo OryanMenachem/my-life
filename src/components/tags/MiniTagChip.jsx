@@ -1,16 +1,22 @@
-/**
- * A small tag chip used on entry cards and detail views.
- * Always dashed border, soft category color tone.
- */
+// Category-specific warm palette from spec
+const CAT_STYLES = {
+  mood:     { bg: "#f6ecd9", fg: "#946a2b", bd: "#dcc59c" },
+  life:     { bg: "#efe7dc", fg: "#876848", bd: "#d9c4a6" },
+  location: { bg: "#ebe9d7", fg: "#71703e", bd: "#cdc69a" },
+  general:  { bg: "#f1efeb", fg: "#6e685f", bd: "#cfc8ba" },
+};
+
 export default function MiniTagChip({ tag, category }) {
-  const color = category?.color ?? "#888888";
+  const key = category?.system_key ?? "general";
+  const style = CAT_STYLES[key] ?? CAT_STYLES.general;
   return (
     <span
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-body font-medium border border-dashed whitespace-nowrap"
+      className="inline-flex items-center gap-1 px-[9px] rounded-full text-[10px] font-body font-medium border border-dashed whitespace-nowrap"
       style={{
-        backgroundColor: `${color}18`,
-        borderColor: `${color}55`,
-        color,
+        height: "22px",
+        backgroundColor: style.bg,
+        borderColor: style.bd,
+        color: style.fg,
       }}
     >
       {tag.name_en}
