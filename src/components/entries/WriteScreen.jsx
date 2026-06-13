@@ -10,6 +10,7 @@ const ICON_MAP = {
 import { useTagCatalog } from "@/hooks/useTagCatalog";
 import { useMediaUploader } from "@/hooks/useMediaUploader";
 import TagPickerSheet from "@/components/tags/TagPickerSheet";
+import AutoTagButton from "@/components/tags/AutoTagButton";
 import MediaRow from "./MediaRow";
 
 /**
@@ -165,8 +166,21 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
           </p>
         )}
 
-        {/* Tags label + chips */}
+        {/* AI Auto-tag */}
         <div className="mt-5">
+          <AutoTagButton
+            text={text}
+            tags={tags}
+            categoryByKey={categoryByKey}
+            selectedIds={selectedTagIds}
+            onTagsAdded={(newIds) =>
+              setSelectedTagIds((prev) => [...prev, ...newIds])
+            }
+          />
+        </div>
+
+        {/* Tags label + chips */}
+        <div className="mt-3">
           <p className="text-[11px] font-body font-semibold uppercase tracking-widest text-muted-foreground/60 mb-2">Tags</p>
           <div className="flex flex-wrap gap-2 items-center">
             {selectedTagIds.map((id) => {
