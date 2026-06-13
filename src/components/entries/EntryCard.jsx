@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from "react";
 import { format } from "date-fns";
 import { getEntryDate } from "@/utils/groupEntriesByDay";
 import MiniTagChip from "@/components/tags/MiniTagChip";
@@ -7,16 +8,22 @@ import LinkCard from "./LinkCard";
 import { highlightText } from "@/utils/searchHighlight";
 
 const MAX_VISIBLE_TAGS = 3;
+const TEXT_LINE_LIMIT = 3; // lines before truncation
 
 // Detect if text is primarily Hebrew/RTL
 const isRTL = (text) => /[\u0590-\u05FF\uFB1D-\uFB4F]/.test(text?.slice(0, 60));
 
-export default function EntryCard({ entry, onClick, onEdit, onDelete, tagById, categoryByKey, searchQuery }) {
+export default function EntryCard({ entry, onEdit, onDelete, tagById, categoryByKey, searchQuery }) {
+  const [textExpanded, setTextExpanded] = useState(false);
+  const [tagsExpanded, setTagsExpanded] = useState(false);
+  const [needsTruncation, setNeedsTruncation] = useState(false);
+  const textRef = useRef(null);
+
   const date = getEntryDate(entry);
   const timeStr = format(date, "HH:mm");
 
   const tagIds = entry.tag_ids || [];
-  const visibleIds = tagIds.slice(0, MAX_VISIBLE_TAGS);
+  const visibleIds = tagsExpanded ? tagIds : tagIds.slice(0, MAX_VISIBLE_TAGS);
   const overflow = tagIds.length - MAX_VISIBLE_TAGS;
 
   const allMedia = entry.media || [];
@@ -25,6 +32,26 @@ export default function EntryCard({ entry, onClick, onEdit, onDelete, tagById, c
   const hasMedia = allMedia.length > 0;
   const hasVisual = visualMedia.length > 0;
   const hasLinks = linkMedia.length > 0;
+
+  // Detect if text overflows the clamped lines
+  useEffect(() => {
+    if (!entry.content || textExpanded) {
+      setNeedsTruncation(false);
+      return;
+    }
+    const el = textRef.current;
+    if (el) {
+      setNeedsTruncation(el.scrollHeight > el.clientHeight);
+    }
+  }, [entry.content, textExpanded]);
+
+  const textStyle = {
+    color: "#2c2823",
+    direction: entry.content && isRTL(entry.content) ? "rtl" : "ltr",
+    textAlign: entry.content && isRTL(entry.content) ? "right" : "left",
+    fontWeight: 400,
+    letterSpacing: "0.01em",
+  };
 
   return (
     <div className="w-full relative" style={{ backgroundColor: "#FFFFFF" }}>
@@ -54,21 +81,36 @@ export default function EntryCard({ entry, onClick, onEdit, onDelete, tagById, c
         </div>
       </div>
 
-      {/* ── Content + tags — tappable ── */}
-      <button onClick={onClick} className="w-full text-left focus:outline-none px-4 pb-[16px]">
+      {/* ── Content + tags — NOT tappable ── */}
+      <div className="px-4 pb-[16px]">
         {entry.content ? (
-          <p
-            className="font-body text-[15px] leading-[1.8] pt-[8px] pb-[12px]"
-            style={{
-              color: "#2c2823",
-              direction: isRTL(entry.content) ? "rtl" : "ltr",
-              textAlign: isRTL(entry.content) ? "right" : "left",
-              fontWeight: 400,
-              letterSpacing: "0.01em",
-            }}
-          >
-            {searchQuery ? highlightText(entry.content, searchQuery) : entry.content}
-          </p>
+          <div>
+            <p
+              ref={textRef}
+              className={`font-body text-[15px] leading-[1.8] pt-[8px] ${!textExpanded ? `line-clamp-${TEXT_LINE_LIMIT}` : ""}`}
+              style={textStyle}
+            >
+              {searchQuery ? highlightText(entry.content, searchQuery) : entry.content}
+            </p>
+            {needsTruncation && !textExpanded && (
+              <button
+                onClick={() => setTextExpanded(true)}
+                className="text-[11.5px] font-body font-medium mt-[2px] transition-colors"
+                style={{ color: "#8c867c" }}
+              >
+                …more
+              </button>
+            )}
+            {textExpanded && (
+              <button
+                onClick={() => setTextExpanded(false)}
+                className="text-[11.5px] font-body font-medium mt-[2px] transition-colors"
+                style={{ color: "#8c867c" }}
+              >
+                less
+              </button>
+            )}
+          </div>
         ) : null}
 
         {/* Tags */}
@@ -80,12 +122,27 @@ export default function EntryCard({ entry, onClick, onEdit, onDelete, tagById, c
               const cat = categoryByKey?.[tag.category_key];
               return <MiniTagChip key={id} tag={tag} category={cat} />;
             })}
-            {overflow > 0 && (
-              <span className="text-[10px] font-body font-semibold" style={{ color: "#8c867c" }}>+{overflow}</span>
+            {overflow > 0 && !tagsExpanded && (
+              <button
+                onClick={() => setTagsExpanded(true)}
+                className="text-[10px] font-body font-semibold transition-colors"
+                style={{ color: "#8c867c" }}
+              >
+                +{overflow}
+              </button>
+            )}
+            {tagsExpanded && overflow > 0 && (
+              <button
+                onClick={() => setTagsExpanded(false)}
+                className="text-[10px] font-body font-semibold transition-colors"
+                style={{ color: "#8c867c" }}
+              >
+                less
+              </button>
             )}
           </div>
         )}
-      </button>
+      </div>
     </div>
   );
 }

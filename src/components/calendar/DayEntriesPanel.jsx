@@ -6,7 +6,6 @@ import DayGroup from "@/components/entries/DayGroup";
 export default function DayEntriesPanel({
   day,
   entries,
-  onEntryClick,
   onEditEntry,
   onDeleteEntry,
   onAddEntry,
@@ -39,7 +38,6 @@ export default function DayEntriesPanel({
         <DayGroup
           label={label}
           entries={sorted}
-          onEntryClick={onEntryClick}
           onEditEntry={onEditEntry}
           onDeleteEntry={onDeleteEntry}
           tagById={tagById}

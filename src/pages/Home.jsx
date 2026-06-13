@@ -7,7 +7,6 @@ import DayGroup from "../components/entries/DayGroup";
 import EmptyState from "../components/entries/EmptyState";
 import Composer from "../components/entries/Composer";
 import WriteScreen from "../components/entries/WriteScreen";
-import EntryDetail from "../components/entries/EntryDetail";
 import DeleteConfirmSheet from "../components/entries/DeleteConfirmSheet";
 import UndoSnackbar from "../components/entries/UndoSnackbar";
 import VoiceMicButton from "../components/voice/VoiceMicButton";
@@ -28,7 +27,6 @@ export default function Home() {
   const navigate = useNavigate();
   const [writing, setWriting] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
-  const [selectedEntry, setSelectedEntry] = useState(null);
   const [deletingEntry, setDeletingEntry] = useState(null);
   const [undoEntry, setUndoEntry] = useState(null);
   const [avatarUrl, setAvatarUrl] = useState(null);
@@ -206,7 +204,6 @@ export default function Home() {
                 key={group.dayKey}
                 label={group.label}
                 entries={group.entries}
-                onEntryClick={setSelectedEntry}
                 onEditEntry={setEditingEntry}
                 onDeleteEntry={handleDeleteRequest}
                 tagById={tagById}
@@ -218,7 +215,7 @@ export default function Home() {
       </main>
 
       {/* Floating mic button — hidden when any overlay is open */}
-      {!writing && !voiceWriting && !editingEntry && !selectedEntry && voiceState === VOICE_IDLE && (
+      {!writing && !voiceWriting && !editingEntry && voiceState === VOICE_IDLE && (
         <VoiceMicButton onClick={handleMicPress} />
       )}
 
@@ -248,16 +245,6 @@ export default function Home() {
           onSave={handleEditSave}
           onCancel={() => setEditingEntry(null)}
           onDelete={() => { setEditingEntry(null); handleDeleteRequest(editingEntry); }}
-        />
-      )}
-
-      {/* Entry detail */}
-      {selectedEntry && (
-        <EntryDetail
-          entry={selectedEntry}
-          onClose={() => setSelectedEntry(null)}
-          tagById={tagById}
-          categoryByKey={categoryByKey}
         />
       )}
 

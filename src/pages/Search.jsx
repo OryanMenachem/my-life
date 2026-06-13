@@ -11,7 +11,6 @@ import ContentTypeFilter from "@/components/search/ContentTypeFilter";
 import AllTagsSheet from "@/components/search/AllTagsSheet";
 import TimeFilterSheet from "@/components/search/TimeFilterSheet";
 import SearchEmptyState from "@/components/search/SearchEmptyState";
-import EntryDetail from "@/components/entries/EntryDetail";
 import WriteScreen from "@/components/entries/WriteScreen";
 import DeleteConfirmSheet from "@/components/entries/DeleteConfirmSheet";
 import DayGroup from "@/components/entries/DayGroup";
@@ -30,7 +29,6 @@ export default function Search() {
   const [customRange, setCustomRange] = useState(null);
   const [allTagsOpen, setAllTagsOpen] = useState(false);
   const [timeSheetOpen, setTimeSheetOpen] = useState(false);
-  const [selectedEntry, setSelectedEntry] = useState(null);
   const [editingEntry, setEditingEntry] = useState(null);
   const [deletingEntry, setDeletingEntry] = useState(null);
   const undoTimerRef = useRef(null);
@@ -229,7 +227,6 @@ export default function Search() {
                   key={group.dayKey}
                   label={group.label}
                   entries={group.entries}
-                  onEntryClick={setSelectedEntry}
                   onEditEntry={setEditingEntry}
                   onDeleteEntry={handleDeleteRequest}
                   tagById={tagById}
@@ -261,14 +258,6 @@ export default function Search() {
             setTimeSheetOpen(false);
           }}
           onClose={() => setTimeSheetOpen(false)}
-        />
-      )}
-      {selectedEntry && (
-        <EntryDetail
-          entry={selectedEntry}
-          onClose={() => setSelectedEntry(null)}
-          tagById={tagById}
-          categoryByKey={categoryByKey}
         />
       )}
       {editingEntry && (

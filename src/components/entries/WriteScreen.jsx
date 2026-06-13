@@ -211,10 +211,16 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
           ref={textareaRef}
           value={text}
           onChange={(e) => setText(e.target.value)}
+          maxLength={5000}
           placeholder="Start writing…"
           dir={/[\u0590-\u05FF\uFB1D-\uFB4F]/.test(text.slice(0, 60)) ? "rtl" : "ltr"}
           className="w-full min-h-[30vh] resize-none bg-transparent outline-none font-heading text-[18px] leading-[1.75] text-foreground placeholder:text-muted-foreground/40 placeholder:italic"
         />
+        {text.length > 4500 && (
+          <p className={`text-right text-[11px] font-body mt-1 transition-colors ${text.length >= 5000 ? "text-destructive" : "text-muted-foreground/60"}`}>
+            {text.length}/5000
+          </p>
+        )}
 
         {/* Media row */}
         <div className="mt-3 pb-2">

@@ -10,7 +10,6 @@ import { useLang } from "@/lib/LanguageContext";
 import CalendarGrid from "@/components/calendar/CalendarGrid";
 import DayEntriesPanel from "@/components/calendar/DayEntriesPanel";
 import WriteScreen from "@/components/entries/WriteScreen";
-import EntryDetail from "@/components/entries/EntryDetail";
 import DeleteConfirmSheet from "@/components/entries/DeleteConfirmSheet";
 
 export default function Calendar() {
@@ -19,7 +18,6 @@ export default function Calendar() {
   const [writing, setWriting] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
   const [deletingEntry, setDeletingEntry] = useState(null);
-  const [selectedEntry, setSelectedEntry] = useState(null);
 
   const queryClient = useQueryClient();
   const { tagById, categoryByKey } = useTagCatalog();
@@ -163,7 +161,6 @@ export default function Calendar() {
           <DayEntriesPanel
             day={selectedDay}
             entries={dayEntries}
-            onEntryClick={setSelectedEntry}
             onEditEntry={setEditingEntry}
             onDeleteEntry={setDeletingEntry}
             onAddEntry={() => setWriting(true)}
@@ -187,15 +184,6 @@ export default function Calendar() {
           entry={editingEntry}
           onSave={handleEditSave}
           onCancel={() => setEditingEntry(null)}
-        />
-      )}
-
-      {selectedEntry && (
-        <EntryDetail
-          entry={selectedEntry}
-          onClose={() => setSelectedEntry(null)}
-          tagById={tagById}
-          categoryByKey={categoryByKey}
         />
       )}
 
