@@ -23,7 +23,7 @@ export default function DayGroup({ label, entries, onEntryClick, onEditEntry, on
       {/* Cards flush white block, hairline separators */}
       <div className="flex flex-col gap-[10px]">
         {entries.map((entry) => (
-          <div key={entry.id} className="bg-card">
+          <div key={entry.id} style={{ backgroundColor: "#FFFFFF" }}>
             <EntryCard
               entry={entry}
               onClick={() => onEntryClick(entry)}

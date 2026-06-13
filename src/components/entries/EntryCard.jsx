@@ -20,7 +20,7 @@ export default function EntryCard({ entry, onClick, onEdit, onDelete, tagById, c
   const hasMedia = entry.media && entry.media.length > 0;
 
   return (
-    <div className="w-full bg-card relative">
+    <div className="w-full relative" style={{ backgroundColor: "#FFFFFF" }}>
       {/* ── Full-width media at top (flush, no padding) ── */}
       {hasMedia && (
         <EntryMediaPreview media={entry.media} flush />

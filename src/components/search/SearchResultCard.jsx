@@ -31,8 +31,8 @@ export default function SearchResultCard({ entry, query, onClick, tagById, categ
   return (
     <button
       onClick={onClick}
-      className="w-full bg-card text-left hover:bg-muted/40 active:bg-muted/60 transition-colors focus:outline-none flex flex-col"
-      style={{ minHeight: "140px", paddingBottom: "14px" }}
+      className="w-full text-left transition-colors focus:outline-none flex flex-col"
+      style={{ minHeight: "140px", paddingBottom: "14px", backgroundColor: "#FFFFFF" }}
     >
       {/* ── Full-width media at top (if present) ── */}
       {hasMedia && (
