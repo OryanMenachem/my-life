@@ -23,6 +23,14 @@
         "charcoal"
       ],
       "default": "cream"
+    },
+    "onboarded": {
+      "type": "boolean",
+      "default": false
+    },
+    "app_lock_enabled": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

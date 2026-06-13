@@ -1,10 +1,12 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Outlet } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { ThemeProvider } from '@/lib/ThemeContext';
+import { LanguageProvider } from '@/lib/LanguageContext';
+import { AppLockProvider, useAppLock } from '@/lib/AppLockContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -17,7 +19,16 @@ import Home from '@/pages/Home';
 import Tags from '@/pages/Tags';
 import Search from '@/pages/Search';
 import CalendarPage from '@/pages/Calendar';
+import Settings from '@/pages/Settings';
 import AppLayout from '@/components/AppLayout';
+import OnboardingGate from '@/components/onboarding/OnboardingGate';
+import AppLockScreen from '@/components/AppLockScreen';
+
+const LockGate = () => {
+  const { locked } = useAppLock();
+  if (locked) return <AppLockScreen />;
+  return <Outlet />;
+};
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -50,11 +61,16 @@ const AuthenticatedApp = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/tags" element={<Tags />} />
+        <Route element={<OnboardingGate />}>
+          <Route element={<LockGate />}>
+            <Route element={<AppLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/calendar" element={<CalendarPage />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/tags" element={<Tags />} />
+            </Route>
+          </Route>
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
@@ -68,13 +84,17 @@ function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
-        <QueryClientProvider client={queryClientInstance}>
-          <Router>
-            <ScrollToTop />
-            <AuthenticatedApp />
-          </Router>
-          <Toaster />
-        </QueryClientProvider>
+        <LanguageProvider>
+          <AppLockProvider>
+            <QueryClientProvider client={queryClientInstance}>
+              <Router>
+                <ScrollToTop />
+                <AuthenticatedApp />
+              </Router>
+              <Toaster />
+            </QueryClientProvider>
+          </AppLockProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </AuthProvider>
   )

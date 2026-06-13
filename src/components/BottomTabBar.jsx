@@ -1,10 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, Search, CalendarDays } from "lucide-react";
+import { BookOpen, Search, CalendarDays, SlidersHorizontal } from "lucide-react";
 
 const TABS = [
-  { path: "/",          label: "Journal",  Icon: BookOpen     },
-  { path: "/calendar",  label: "Calendar", Icon: CalendarDays },
-  { path: "/search",    label: "Search",   Icon: Search       },
+  { path: "/",          label: "Journal",  Icon: BookOpen         },
+  { path: "/calendar",  label: "Calendar", Icon: CalendarDays     },
+  { path: "/search",    label: "Search",   Icon: Search           },
+  { path: "/settings",  label: "Settings", Icon: SlidersHorizontal },
 ];
 
 export default function BottomTabBar() {
