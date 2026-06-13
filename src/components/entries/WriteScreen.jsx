@@ -9,11 +9,13 @@ import MediaRow from "./MediaRow";
 /**
  * Used for both creating (entry=null) and editing (entry=existing).
  * onSave(savedEntry) is called with the created/updated record.
+ * source: "text" | "voice" — stored on the entry when creating.
+ * initialText: pre-filled text (e.g. from voice transcription).
  */
-export default function WriteScreen({ onSave, onCancel, entry = null }) {
+export default function WriteScreen({ onSave, onCancel, entry = null, source = "text", initialText = "" }) {
   const isEdit = !!entry;
 
-  const [text, setText] = useState(entry?.content ?? "");
+  const [text, setText] = useState(entry?.content ?? initialText);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [mediaError, setMediaError] = useState("");
@@ -61,7 +63,7 @@ export default function WriteScreen({ onSave, onCancel, entry = null }) {
         } catch { /* use default */ }
         savedEntry = await base44.entities.Entry.create({
           content: trimmed,
-          source: "text",
+          source: source,
           entry_date: new Date().toISOString(),
           language,
           tag_ids: selectedTagIds,
