@@ -27,7 +27,7 @@ export default function EntryCard({ entry, onClick, onEdit, onDelete, tagById, c
       )}
 
       {/* ── Meta row + kebab menu ── */}
-      <div className={`flex items-center gap-[6px] px-4 ${hasMedia ? "pt-3" : "pt-3"}`}>
+      <div className={`flex items-center gap-[6px] px-4 ${hasMedia ? "pt-4" : "pt-5"}`}>
         <span className="w-[6px] h-[6px] rounded-full flex-shrink-0" style={{ backgroundColor: "#c79a4f" }} />
         <span className="text-[10.5px] font-body font-semibold tabular-nums" style={{ color: "#8c867c" }}>
           {timeStr}
@@ -39,10 +39,10 @@ export default function EntryCard({ entry, onClick, onEdit, onDelete, tagById, c
       </div>
 
       {/* ── Content + tags — tappable ── */}
-      <button onClick={onClick} className="w-full text-left focus:outline-none px-4 pb-[13px]">
+      <button onClick={onClick} className="w-full text-left focus:outline-none px-4 pb-[16px]">
         {entry.content ? (
           <p
-            className="font-body text-[14.5px] leading-[1.75] pt-[5px] pb-[9px]"
+            className="font-body text-[15px] leading-[1.8] pt-[8px] pb-[12px]"
             style={{
               color: "#2c2823",
               direction: isRTL(entry.content) ? "rtl" : "ltr",
@@ -57,7 +57,7 @@ export default function EntryCard({ entry, onClick, onEdit, onDelete, tagById, c
 
         {/* Tags */}
         {visibleIds.length > 0 && (
-          <div className="flex flex-wrap gap-[5px] items-center mt-1">
+          <div className="flex flex-wrap gap-[5px] items-center mt-3">
             {visibleIds.map((id) => {
               const tag = tagById?.[id];
               if (!tag) return null;
