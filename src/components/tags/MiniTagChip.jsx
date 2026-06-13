@@ -2,6 +2,9 @@ import {
   Sun, Moon, Heart, Zap, Wind, Cloud,
   Briefcase, Users, User, HeartPulse, BookOpen,
   Home, TreePine, Plane, Lightbulb, Mountain, Star, Crosshair,
+  UtensilsCrossed, GlassWater, Coffee, Waves, Umbrella, Compass,
+  Sailboat, MapPin, Ticket, Leaf, Trees, ShoppingBag, Film, Music,
+  Landmark, Sparkles,
 } from "lucide-react";
 
 // Map lucide icon name strings → components
@@ -31,6 +34,7 @@ const CAT_STYLES = {
   mood:     { bg: "#f6ecd9", fg: "#946a2b", bd: "#dcc59c" },
   life:     { bg: "#efe7dc", fg: "#876848", bd: "#d9c4a6" },
   location: { bg: "#ebe9d7", fg: "#71703e", bd: "#cdc69a" },
+  leisure:  { bg: "#e8f0ed", fg: "#407a6c", bd: "#b8d4cc" },
   general:  { bg: "#f1efeb", fg: "#6e685f", bd: "#cfc8ba" },
 };
 

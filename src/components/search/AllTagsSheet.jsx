@@ -4,6 +4,9 @@ import {
   Sun, Moon, Heart, Zap, Wind, Cloud,
   Briefcase, Users, User, HeartPulse, BookOpen,
   Home, TreePine, Plane, Lightbulb, Mountain, Star, Crosshair,
+  UtensilsCrossed, GlassWater, Coffee, Waves, Umbrella, Compass,
+  Sailboat, MapPin, Ticket, Leaf, Trees, ShoppingBag, Film, Music,
+  Landmark, Sparkles,
 } from "lucide-react";
 
 const ICON_MAP = {
@@ -12,6 +15,11 @@ const ICON_MAP = {
   "book-open": BookOpen, "home": Home, "tree-pine": TreePine, "plane": Plane,
   "lightbulb": Lightbulb, "mountain": Mountain,
   "star": Star, "crosshair": Crosshair,
+  "utensils-crossed": UtensilsCrossed, "glass-water": GlassWater, "coffee": Coffee,
+  "waves": Waves, "umbrella": Umbrella, "compass": Compass, "sailboat": Sailboat,
+  "map-pin": MapPin, "ticket": Ticket, "leaf": Leaf, "trees": Trees,
+  "shopping-bag": ShoppingBag, "film": Film, "music": Music, "landmark": Landmark,
+  "sparkles": Sparkles,
 };
 
 export default function AllTagsSheet({ categories, tags, selectedTagIds, onClose }) {

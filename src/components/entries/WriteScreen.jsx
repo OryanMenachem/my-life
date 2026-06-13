@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, Plus, X, Trash2, Sun, Moon, Heart, Zap, Wind, Cloud, Briefcase, Users, User, HeartPulse, BookOpen, Home, TreePine, Plane, Lightbulb, Mountain, Star, Crosshair } from "lucide-react";
+import { Loader2, Plus, X, Trash2, Sun, Moon, Heart, Zap, Wind, Cloud, Briefcase, Users, User, HeartPulse, BookOpen, Home, TreePine, Plane, Lightbulb, Mountain, Star, Crosshair, UtensilsCrossed, GlassWater, Coffee, Waves, Umbrella, Compass, Sailboat, MapPin, Ticket, Leaf, Trees, ShoppingBag, Film, Music, Landmark, Sparkles } from "lucide-react";
 
 const ICON_MAP = {
   "sun": Sun, "moon": Moon, "heart": Heart, "zap": Zap, "wind": Wind, "cloud": Cloud,
@@ -8,6 +8,11 @@ const ICON_MAP = {
   "book-open": BookOpen, "home": Home, "tree-pine": TreePine, "plane": Plane,
   "lightbulb": Lightbulb, "mountain": Mountain,
   "star": Star, "crosshair": Crosshair,
+  "utensils-crossed": UtensilsCrossed, "glass-water": GlassWater, "coffee": Coffee,
+  "waves": Waves, "umbrella": Umbrella, "compass": Compass, "sailboat": Sailboat,
+  "map-pin": MapPin, "ticket": Ticket, "leaf": Leaf, "trees": Trees,
+  "shopping-bag": ShoppingBag, "film": Film, "music": Music, "landmark": Landmark,
+  "sparkles": Sparkles,
 };
 import { useTagCatalog } from "@/hooks/useTagCatalog";
 import { useMediaUploader } from "@/hooks/useMediaUploader";
@@ -215,6 +220,7 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
                 mood:     { bg: "#f6ecd9", fg: "#946a2b", bd: "#dcc59c" },
                 life:     { bg: "#efe7dc", fg: "#876848", bd: "#d9c4a6" },
                 location: { bg: "#ebe9d7", fg: "#71703e", bd: "#cdc69a" },
+                leisure:  { bg: "#e8f0ed", fg: "#407a6c", bd: "#b8d4cc" },
                 general:  { bg: "#f1efeb", fg: "#6e685f", bd: "#cfc8ba" },
               };
               const s = CAT_STYLES[cat?.system_key ?? "general"] ?? CAT_STYLES.general;
