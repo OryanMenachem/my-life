@@ -133,7 +133,7 @@ export default function Search() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen flex flex-col bg-background">
       {/* Sticky search block — unified seamless */}
       <div className="sticky top-0 z-10 bg-card border-b border-border">
         <div className="max-w-lg mx-auto px-4 pt-4 pb-3 flex flex-col gap-2">
@@ -154,41 +154,22 @@ export default function Search() {
         </div>
       </div>
 
-      {/* Content */}
-      <main className="pb-24">
+      {/* Content — full-screen snap scroll container */}
+      <main className="flex-1 overflow-y-scroll snap-y snap-mandatory scroll-smooth" style={{ scrollBehavior: "smooth" }}>
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
           </div>
         ) : !showResults ? (
-          /* Idle state: show a prompt */
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <p className="font-heading text-[17px] text-muted-foreground/60 italic">
-              Search your journal…
-            </p>
-          </div>
+           /* Idle state: show a prompt */
+           <div className="snap-start snap-always h-screen flex flex-col items-center justify-center text-center">
+             <p className="font-heading text-[17px] text-muted-foreground/60 italic">
+               Search your journal…
+             </p>
+           </div>
         ) : filtered.length === 0 ? (
-          <>
-            <ActiveFilterRow
-              query={rawQuery}
-              selectedTagIds={selectedTagIds}
-              timeFilter={timeFilter}
-              tagById={tagById}
-              categoryByKey={categoryByKey}
-              onRemoveQuery={() => setRawQuery("")}
-              onRemoveTag={(id) => setSelectedTagIds((p) => p.filter((x) => x !== id))}
-              onRemoveTime={() => { setTimeFilter("all"); setCustomRange(null); }}
-              onClearAll={clearAll}
-            />
-            <SearchEmptyState
-              query={rawQuery}
-              onSearchAllTime={() => { setTimeFilter("all"); setCustomRange(null); }}
-              onClearAll={clearAll}
-            />
-          </>
-        ) : (
-          <>
-            <div className="max-w-lg mx-auto px-4">
+          <div className="snap-start snap-always h-screen flex flex-col">
+            <div className="max-w-lg mx-auto w-full px-4">
               <ActiveFilterRow
                 query={rawQuery}
                 selectedTagIds={selectedTagIds}
@@ -201,10 +182,30 @@ export default function Search() {
                 onClearAll={clearAll}
               />
             </div>
-            <div className="mt-4">
-              {groups.map((group) => (
+            <SearchEmptyState
+              query={rawQuery}
+              onSearchAllTime={() => { setTimeFilter("all"); setCustomRange(null); }}
+              onClearAll={clearAll}
+            />
+          </div>
+        ) : (
+          <>
+            <div className="snap-start snap-always max-w-lg mx-auto w-full px-4 pt-4">
+              <ActiveFilterRow
+                query={rawQuery}
+                selectedTagIds={selectedTagIds}
+                timeFilter={timeFilter}
+                tagById={tagById}
+                categoryByKey={categoryByKey}
+                onRemoveQuery={() => setRawQuery("")}
+                onRemoveTag={(id) => setSelectedTagIds((p) => p.filter((x) => x !== id))}
+                onRemoveTime={() => { setTimeFilter("all"); setCustomRange(null); }}
+                onClearAll={clearAll}
+              />
+            </div>
+            {groups.map((group) => (
+              <div key={group.dayKey} className="snap-start snap-always h-screen flex flex-col px-4 py-8">
                 <DayGroup
-                  key={group.dayKey}
                   label={group.label}
                   entries={group.entries}
                   onEntryClick={setSelectedEntry}
@@ -213,8 +214,8 @@ export default function Search() {
                   tagById={tagById}
                   categoryByKey={categoryByKey}
                 />
-              ))}
-            </div>
+              </div>
+            ))}
           </>
         )}
       </main>
