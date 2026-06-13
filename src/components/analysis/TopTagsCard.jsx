@@ -1,7 +1,7 @@
 import {
   Sun, Moon, Heart, Zap, Wind, Cloud,
   Briefcase, Users, User, HeartPulse, BookOpen,
-  Home, TreePine, Plane, Lightbulb, Mountain,
+  Home, TreePine, Plane, Lightbulb, Mountain, Star, Crosshair,
 } from "lucide-react";
 
 const ICON_MAP = {
@@ -9,6 +9,7 @@ const ICON_MAP = {
   briefcase: Briefcase, users: Users, user: User, "heart-pulse": HeartPulse,
   "book-open": BookOpen, home: Home, "tree-pine": TreePine, plane: Plane,
   lightbulb: Lightbulb, mountain: Mountain,
+  star: Star, crosshair: Crosshair,
 };
 
 const CAT_COLORS = {
