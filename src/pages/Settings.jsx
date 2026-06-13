@@ -84,8 +84,7 @@ export default function Settings() {
       await base44.auth.updateMe({ avatar_url: file_url });
       setAvatarUrl(file_url);
       setMe((prev) => ({ ...prev, avatar_url: file_url }));
-      // Notify AppLayout to refresh
-      if (window.__refreshAvatar) window.__refreshAvatar();
+      if (window.__refreshHomeAvatar) window.__refreshHomeAvatar();
     } catch {
       setAvatarError("Upload failed — please try again.");
     }
@@ -100,7 +99,7 @@ export default function Settings() {
       await base44.auth.updateMe({ avatar_url: key });
       setAvatarUrl(key);
       setMe((prev) => ({ ...prev, avatar_url: key }));
-      if (window.__refreshAvatar) window.__refreshAvatar();
+      if (window.__refreshHomeAvatar) window.__refreshHomeAvatar();
     } catch {
       setAvatarError("Couldn't save avatar — please try again.");
     }

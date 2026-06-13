@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { groupEntriesByDay } from "@/utils/groupEntriesByDay";
@@ -14,6 +15,7 @@ import VoiceRecordingOverlay from "../components/voice/VoiceRecordingOverlay";
 import VoicePermissionSheet from "../components/voice/VoicePermissionSheet";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useTagCatalog } from "@/hooks/useTagCatalog";
+import Avatar from "../components/Avatar";
 import { Loader2 } from "lucide-react";
 
 // Voice states
@@ -23,12 +25,34 @@ const VOICE_PERMISSION_ERROR = "permission_error";
 const VOICE_NOT_SUPPORTED = "not_supported";
 
 export default function Home() {
+  const navigate = useNavigate();
   const [writing, setWriting] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [deletingEntry, setDeletingEntry] = useState(null);
   const [undoEntry, setUndoEntry] = useState(null);
+  const [avatarUrl, setAvatarUrl] = useState(null);
+  const [userName, setUserName] = useState("");
   const undoTimerRef = useRef(null);
+
+  // Load avatar for Home header only
+  useEffect(() => {
+    base44.auth.me().then((u) => {
+      setAvatarUrl(u?.avatar_url || null);
+      setUserName(u?.full_name || "");
+    }).catch(() => {});
+  }, []);
+
+  // Listen for avatar updates from Settings
+  useEffect(() => {
+    window.__refreshHomeAvatar = () => {
+      base44.auth.me().then((u) => {
+        setAvatarUrl(u?.avatar_url || null);
+        setUserName(u?.full_name || "");
+      }).catch(() => {});
+    };
+    return () => { delete window.__refreshHomeAvatar; };
+  }, []);
 
 
   // Voice
@@ -146,12 +170,30 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-card border-b border-border">
+      <header className="sticky top-0 z-10 bg-card border-b border-border relative">
         <div className="max-w-lg mx-auto px-4 py-2 text-center">
           <h1 className="font-heading text-[21px] font-semibold tracking-[-0.5px] text-foreground uppercase">
             MYLIFE
           </h1>
         </div>
+        {/* Avatar — top-left corner, Home screen only */}
+        <button
+          onClick={() => navigate("/settings")}
+          className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full hover:opacity-85 transition-opacity active:scale-95"
+          aria-label="Open profile"
+          style={{ minWidth: 38, minHeight: 38 }}
+        >
+          <span
+            className="block rounded-full flex-shrink-0"
+            style={{
+              width: 34,
+              height: 34,
+              boxShadow: "0 0 0 1.5px hsla(var(--foreground), 0.18)",
+            }}
+          >
+            <Avatar avatarUrl={avatarUrl} userName={userName} size={34} />
+          </span>
+        </button>
       </header>
 
       {/* Content */}
