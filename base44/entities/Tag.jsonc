@@ -1,0 +1,50 @@
+{
+  "name": "Tag",
+  "type": "object",
+  "properties": {
+    "category_key": {
+      "type": "string"
+    },
+    "system_key": {
+      "type": "string"
+    },
+    "name_en": {
+      "type": "string"
+    },
+    "name_he": {
+      "type": "string"
+    },
+    "icon": {
+      "type": "string"
+    },
+    "sort_order": {
+      "type": "number"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "category_key",
+    "name_en"
+  ],
+  "rls": {
+    "read": true,
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
