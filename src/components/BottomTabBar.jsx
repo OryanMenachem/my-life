@@ -4,7 +4,6 @@ const HomeIcon = ({ sw }) => (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 6.4C10.2 5.2 7.6 4.6 4.5 4.8a1 1 0 0 0-.9 1V18a1 1 0 0 0 1.05 1c2.7-.16 5 .35 7.35 1.7" />
     <path d="M12 6.4C13.8 5.2 16.4 4.6 19.5 4.8a1 1 0 0 1 .9 1V18a1 1 0 0 1-1.05 1c-2.7-.16-5 .35-7.35 1.7" />
-    <path d="M12 4.6V20.8l1.7-1.7 1.7 1.7V8.2" strokeWidth={sw * 1.25} />
   </svg>
 );
 
