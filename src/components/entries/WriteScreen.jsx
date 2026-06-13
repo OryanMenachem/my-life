@@ -11,6 +11,7 @@ const ICON_MAP = {
 };
 import { useTagCatalog } from "@/hooks/useTagCatalog";
 import { useMediaUploader } from "@/hooks/useMediaUploader";
+import { autoTagEntry } from "@/utils/autoTag";
 import TagPickerSheet from "@/components/tags/TagPickerSheet";
 import AutoTagButton from "@/components/tags/AutoTagButton";
 import MediaRow from "./MediaRow";
@@ -56,26 +57,47 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
     setError("");
     setSaving(true);
     try {
+      let finalTagIds = [...selectedTagIds];
+      let language = "en";
+
+      if (!isEdit) {
+        // Fetch user settings (language + auto_ai_tagging)
+        try {
+          const me = await base44.auth.me();
+          if (me?.language) language = me.language;
+
+          // Auto AI tagging for new entries when enabled
+          if (me?.auto_ai_tagging && trimmed) {
+            try {
+              const aiIds = await autoTagEntry(trimmed, tags, categoryByKey);
+              const existing = new Set(finalTagIds);
+              aiIds.forEach((id) => {
+                if (!existing.has(id)) finalTagIds.push(id);
+              });
+            } catch {
+              // AI failed, continue with manual tags only
+            }
+          }
+        } catch {
+          /* use defaults */
+        }
+      }
+
       let savedEntry;
       if (isEdit) {
         savedEntry = await base44.entities.Entry.update(entry.id, {
           content: trimmed,
-          tag_ids: selectedTagIds,
+          tag_ids: finalTagIds,
           media: readyMedia,
           updated_date: new Date().toISOString(),
         });
       } else {
-        let language = "en";
-        try {
-          const me = await base44.auth.me();
-          if (me?.language) language = me.language;
-        } catch { /* use default */ }
         savedEntry = await base44.entities.Entry.create({
           content: trimmed,
           source: source,
           entry_date: new Date().toISOString(),
           language,
-          tag_ids: selectedTagIds,
+          tag_ids: finalTagIds,
           media: readyMedia,
         });
       }

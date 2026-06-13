@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import {
   User, LogOut, Palette, Globe, Download, Trash2, Lock,
-  Info, Pencil, Check, X
+  Info, Pencil, Check, X, Sparkles
 } from "lucide-react";
 import { useTheme, THEMES } from "@/lib/ThemeContext";
 import { useLang } from "@/lib/LanguageContext";
@@ -12,6 +12,7 @@ import SettingsRow from "@/components/settings/SettingsRow";
 import ThemePickerSheet from "@/components/ThemePickerSheet";
 import AppLockSheet from "@/components/settings/AppLockSheet";
 import DeleteAccountSheet from "@/components/settings/DeleteAccountSheet";
+import { Switch } from "@/components/ui/switch";
 
 const APP_VERSION = "1.0.0";
 
@@ -31,6 +32,8 @@ export default function Settings() {
   const [editingName, setEditingName] = useState(false);
   const [nameVal, setNameVal] = useState("");
   const [savingName, setSavingName] = useState(false);
+  const [autoTagging, setAutoTagging] = useState(false);
+  const [togglingAI, setTogglingAI] = useState(false);
 
   const [themeSheet, setThemeSheet] = useState(false);
   const [lockSheet, setLockSheet] = useState(false);
@@ -41,8 +44,21 @@ export default function Settings() {
     base44.auth.me().then((u) => {
       setMe(u);
       setNameVal(u?.full_name || "");
+      setAutoTagging(u?.auto_ai_tagging || false);
     }).catch(() => {});
   }, []);
+
+  const toggleAutoTagging = async (checked) => {
+    setAutoTagging(checked);
+    setTogglingAI(true);
+    try {
+      await base44.auth.updateMe({ auto_ai_tagging: checked });
+      setMe((prev) => ({ ...prev, auto_ai_tagging: checked }));
+    } catch {
+      setAutoTagging(!checked);
+    }
+    setTogglingAI(false);
+  };
 
   const saveName = async () => {
     if (!nameVal.trim()) return;
@@ -166,6 +182,26 @@ export default function Settings() {
               </div>
             }
           />
+        </SettingsSection>
+
+        {/* ── AI ── */}
+        <SettingsSection title="AI">
+          <div className="px-5 py-4 flex items-center gap-3">
+            <Sparkles className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            <div className="flex-1">
+              <p className="font-body text-sm font-medium text-foreground">
+                Automatic AI tagging
+              </p>
+              <p className="font-body text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                Automatically tag new entries using your existing tags.
+              </p>
+            </div>
+            <Switch
+              checked={autoTagging}
+              onCheckedChange={toggleAutoTagging}
+              disabled={togglingAI}
+            />
+          </div>
         </SettingsSection>
 
         {/* ── Privacy & Data ── */}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Sparkles, RotateCcw } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+import { autoTagEntry } from "@/utils/autoTag";
 
 /**
  * AI auto-tagging button.
@@ -27,26 +27,7 @@ export default function AutoTagButton({ text, tags, categoryByKey, selectedIds, 
     setHint("");
 
     try {
-      const allowedList = tags.map((t) => ({
-        id: t.id,
-        name: t.name_en,
-        name_he: t.name_he || "",
-        category: categoryByKey[t.category_key]?.name_en || t.category_key,
-      }));
-
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are tagging a personal journal entry. Choose only from this exact list of allowed tags: ${JSON.stringify(allowedList)}. Return only the ids of the tags from this list that clearly match the entry's content. Do not create new tags, do not return anything not in the list, and do not return more than 5 tags. If nothing fits, return an empty list.\n\nEntry text: "${text.trim()}"`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            tag_ids: { type: "array", items: { type: "string" } },
-          },
-        },
-      });
-
-      // Safety: keep only ids that truly exist in the catalog
-      const allowedIds = new Set(tags.map((t) => t.id));
-      const returned = (result?.tag_ids || []).filter((id) => allowedIds.has(id));
+      const returned = await autoTagEntry(text, tags, categoryByKey);
 
       // Merge with existing, no duplicates
       const existing = new Set(selectedIds);
