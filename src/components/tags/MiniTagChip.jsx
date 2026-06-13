@@ -27,6 +27,11 @@ const ICON_MAP = {
   "mountain": Mountain,
   "star": Star,
   "crosshair": Crosshair,
+  "utensils-crossed": UtensilsCrossed, "glass-water": GlassWater, "coffee": Coffee,
+  "waves": Waves, "umbrella": Umbrella, "compass": Compass, "sailboat": Sailboat,
+  "map-pin": MapPin, "ticket": Ticket, "leaf": Leaf, "trees": Trees,
+  "shopping-bag": ShoppingBag, "film": Film, "music": Music, "landmark": Landmark,
+  "sparkles": Sparkles,
 };
 
 // Category-specific warm palette from spec
