@@ -6,6 +6,9 @@ import EntryMediaPreview from "./EntryMediaPreview";
 
 const MAX_VISIBLE_TAGS = 3;
 
+// Detect if text is primarily Hebrew/RTL
+const isRTL = (text) => /[\u0590-\u05FF\uFB1D-\uFB4F]/.test(text?.slice(0, 60));
+
 export default function EntryCard({ entry, onClick, onEdit, onDelete, tagById, categoryByKey }) {
   const date = getEntryDate(entry);
   const timeStr = format(date, "HH:mm");
@@ -38,7 +41,16 @@ export default function EntryCard({ entry, onClick, onEdit, onDelete, tagById, c
       {/* ── Content + tags — tappable ── */}
       <button onClick={onClick} className="w-full text-left focus:outline-none px-4 pb-[13px]">
         {entry.content ? (
-          <p className="font-heading text-[13.5px] leading-[1.5] pt-[5px] pb-[9px]" style={{ color: "#2c2823" }}>
+          <p
+            className="font-body text-[14.5px] leading-[1.75] pt-[5px] pb-[9px]"
+            style={{
+              color: "#2c2823",
+              direction: isRTL(entry.content) ? "rtl" : "ltr",
+              textAlign: isRTL(entry.content) ? "right" : "left",
+              fontWeight: 400,
+              letterSpacing: "0.01em",
+            }}
+          >
             {entry.content}
           </p>
         ) : null}
