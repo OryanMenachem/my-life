@@ -1,15 +1,15 @@
 import { useState, useMemo, useCallback } from "react";
 import { useAllEntries, useFilteredEntriesWithTags } from "@/hooks/useSearchEntries";
 import { useTagCatalog } from "@/hooks/useTagCatalog";
-import { groupSearchResults } from "@/utils/groupSearchResults";
+import { groupEntriesByDay } from "@/utils/groupEntriesByDay";
 import SearchBar from "@/components/search/SearchBar";
 import QuickTagChips from "@/components/search/QuickTagChips";
 import ActiveFilterRow from "@/components/search/ActiveFilterRow";
 import AllTagsSheet from "@/components/search/AllTagsSheet";
 import TimeFilterSheet from "@/components/search/TimeFilterSheet";
-import SearchResultCard from "@/components/search/SearchResultCard";
 import SearchEmptyState from "@/components/search/SearchEmptyState";
 import EntryDetail from "@/components/entries/EntryDetail";
+import DayGroup from "@/components/entries/DayGroup";
 import { Loader2 } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
 import {
@@ -73,7 +73,15 @@ export default function Search() {
     tagById,
   });
 
-  const groups = useMemo(() => groupSearchResults(filtered), [filtered]);
+  const groups = useMemo(() => {
+    // Sort filtered entries newest-first
+    const sorted = [...filtered].sort((a, b) => {
+      const dateA = new Date(a.entry_date || a.created_date);
+      const dateB = new Date(b.entry_date || b.created_date);
+      return dateB - dateA;
+    });
+    return groupEntriesByDay(sorted);
+  }, [filtered]);
 
   const hasFilters = rawQuery.trim() || selectedTagIds.length > 0 || (timeFilter && timeFilter !== "all");
   const showResults = hasFilters;
@@ -148,43 +156,29 @@ export default function Search() {
         ) : (
           <>
             <ActiveFilterRow
-              query={rawQuery}
-              selectedTagIds={selectedTagIds}
-              timeFilter={timeFilter}
-              tagById={tagById}
-              categoryByKey={categoryByKey}
-              onRemoveQuery={() => setRawQuery("")}
-              onRemoveTag={(id) => setSelectedTagIds((p) => p.filter((x) => x !== id))}
-              onRemoveTime={() => { setTimeFilter("all"); setCustomRange(null); }}
-              onClearAll={clearAll}
-            />
-            {groups.map((group) => (
-              <div key={group.key} className="mt-4">
-                {/* Group header */}
-                <div className="px-1 pb-2">
-                  <span className="font-heading text-sm font-semibold text-foreground/70 tracking-wide">
-                    {group.label} · {group.entries.length}
-                  </span>
-                </div>
-                {/* Cards */}
-                <div className="bg-card rounded-2xl border border-border/50 shadow-sm overflow-hidden">
-                  {group.entries.map((entry, i) => (
-                    <div key={entry.id}>
-                      <SearchResultCard
-                        entry={entry}
-                        query={query}
-                        onClick={() => setSelectedEntry(entry)}
-                        tagById={tagById}
-                        categoryByKey={categoryByKey}
-                      />
-                      {i < group.entries.length - 1 && (
-                        <div className="mx-5 h-px bg-border/50" />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+               query={rawQuery}
+               selectedTagIds={selectedTagIds}
+               timeFilter={timeFilter}
+               tagById={tagById}
+               categoryByKey={categoryByKey}
+               onRemoveQuery={() => setRawQuery("")}
+               onRemoveTag={(id) => setSelectedTagIds((p) => p.filter((x) => x !== id))}
+               onRemoveTime={() => { setTimeFilter("all"); setCustomRange(null); }}
+               onClearAll={clearAll}
+             />
+             {groups.map((group) => (
+               <div key={group.dayKey} className="mt-4">
+                 <DayGroup
+                   label={group.label}
+                   entries={group.entries}
+                   onEntryClick={setSelectedEntry}
+                   onEditEntry={() => {}}
+                   onDeleteEntry={() => {}}
+                   tagById={tagById}
+                   categoryByKey={categoryByKey}
+                 />
+               </div>
+             ))}
           </>
         )}
       </main>
