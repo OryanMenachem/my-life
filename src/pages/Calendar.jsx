@@ -99,45 +99,44 @@ export default function Calendar() {
     : null;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border/40">
-        <div className="max-w-lg mx-auto px-5 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-heading font-semibold tracking-tight text-foreground">
-              Calendar
-            </h1>
-            <button
-              onClick={goToToday}
-              className="text-xs font-body font-semibold px-3 py-1.5 rounded-full border border-border/60 text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
-            >
-              Today
-            </button>
-          </div>
+      <header className="sticky top-0 z-10 bg-card border-b border-border">
+        <div className="max-w-lg mx-auto px-4 py-3 text-center">
+          <h1 className="font-heading text-[21px] font-semibold tracking-[-0.5px] text-foreground uppercase">
+            לוח שנה
+          </h1>
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto px-5 py-4">
+      <main className="max-w-lg mx-auto px-4 py-4">
         {/* Month navigation */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-5 gap-3">
           <button
             onClick={goToPrev}
-            className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-muted/60 active:scale-95 transition-all"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors flex-shrink-0"
             aria-label="Previous month"
           >
             <ChevronLeft className="w-5 h-5 text-foreground" />
           </button>
 
-          <span className="text-base font-body font-semibold text-foreground">
+          <span className="text-base font-body font-semibold text-foreground flex-1 text-center">
             {format(month, "MMMM yyyy")}
           </span>
 
           <button
             onClick={goToNext}
-            className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-muted/60 active:scale-95 transition-all"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors flex-shrink-0"
             aria-label="Next month"
           >
             <ChevronRight className="w-5 h-5 text-foreground" />
+          </button>
+
+          <button
+            onClick={goToToday}
+            className="text-xs font-body font-semibold px-3 py-1.5 rounded-full border border-border/60 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+          >
+            Today
           </button>
         </div>
 

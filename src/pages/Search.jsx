@@ -253,7 +253,7 @@ export default function Search() {
       )}
       {editingEntry && (
         <WriteScreen
-          initialEntry={editingEntry}
+          entry={editingEntry}
           onSave={handleEditSave}
           onCancel={() => setEditingEntry(null)}
         />

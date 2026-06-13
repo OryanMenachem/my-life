@@ -2,8 +2,9 @@ import { Link, useLocation } from "react-router-dom";
 
 const HomeIcon = ({ sw }) => (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3.5 11.4a1 1 0 0 1 .35-.76l7.5-6.4a1 1 0 0 1 1.3 0l7.5 6.4a1 1 0 0 1 .35.76V19a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2z" />
-    <path d="M9.5 21v-4.5a2.5 2.5 0 0 1 5 0V21" />
+    <path d="M2 3h20a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
+    <path d="M7 8v3m5-3v3m5-3v3M6 15h12" />
+    <path d="M8 3v2a2 2 0 1 0 8 0V3" />
   </svg>
 );
 
