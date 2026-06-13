@@ -1,0 +1,49 @@
+{
+  "name": "Entry",
+  "type": "object",
+  "properties": {
+    "content": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 5000,
+      "description": "The entry text"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "text",
+        "voice"
+      ],
+      "default": "text",
+      "description": "How the entry was created"
+    },
+    "entry_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the moment happened"
+    },
+    "language": {
+      "type": "string",
+      "enum": [
+        "en",
+        "he"
+      ],
+      "default": "en"
+    }
+  },
+  "required": [
+    "content"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

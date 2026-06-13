@@ -1,0 +1,14 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "language": {
+      "type": "string",
+      "enum": [
+        "en",
+        "he"
+      ],
+      "default": "en"
+    }
+  }
+}
