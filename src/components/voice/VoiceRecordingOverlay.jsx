@@ -4,11 +4,11 @@ import { Square } from "lucide-react";
 /**
  * Full-screen recording overlay.
  * Props:
- *   transcript  — live transcribed text (string)
+ *   transcribing — bool: whisper is processing
  *   onStop()    — user tapped stop
  *   onCancel()  — user cancelled (discards result)
  */
-export default function VoiceRecordingOverlay({ transcript, onStop, onCancel }) {
+export default function VoiceRecordingOverlay({ transcribing = false, onStop, onCancel }) {
   const [elapsed, setElapsed] = useState(0);
   const intervalRef = useRef(null);
 
@@ -57,16 +57,16 @@ export default function VoiceRecordingOverlay({ transcript, onStop, onCancel }) 
         }
       `}</style>
 
-      {/* Listening label */}
+      {/* Status label */}
       <p className="text-center text-xs font-body font-semibold uppercase tracking-widest text-muted-foreground mb-6 flex-shrink-0">
-        Listening…
+        {transcribing ? "Transcribing…" : "Listening…"}
       </p>
 
-      {/* Live transcript */}
-      <div className="flex-1 overflow-y-auto px-6">
-        {transcript ? (
-          <p className="font-heading text-[18px] leading-[1.75] text-foreground">
-            {transcript}
+      {/* Center message */}
+      <div className="flex-1 overflow-y-auto px-6 flex items-start justify-center">
+        {transcribing ? (
+          <p className="font-heading italic text-muted-foreground/60 text-[18px]">
+            Processing your voice…
           </p>
         ) : (
           <p className="font-heading italic text-muted-foreground/40 text-[18px]">
@@ -76,15 +76,18 @@ export default function VoiceRecordingOverlay({ transcript, onStop, onCancel }) 
       </div>
 
       {/* Stop button */}
-      <div className="flex justify-center pb-12 pt-6 flex-shrink-0">
+      <div className="flex flex-col items-center pb-12 pt-6 gap-3 flex-shrink-0">
         <button
           onClick={onStop}
-          className="w-16 h-16 rounded-full bg-foreground flex items-center justify-center shadow-lg active:scale-95 transition-all"
+          disabled={transcribing}
+          className="w-16 h-16 rounded-full bg-foreground flex items-center justify-center shadow-lg active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
           aria-label="Stop recording"
         >
           <Square className="w-5 h-5 text-background fill-background" />
         </button>
-        <p className="absolute mt-20 text-xs font-body text-muted-foreground">Tap to stop</p>
+        <p className="text-xs font-body text-muted-foreground">
+          {transcribing ? "Please wait…" : "Tap to stop"}
+        </p>
       </div>
     </div>
   );

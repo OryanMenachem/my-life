@@ -12,7 +12,7 @@ import UndoSnackbar from "../components/entries/UndoSnackbar";
 import VoiceMicButton from "../components/voice/VoiceMicButton";
 import VoiceRecordingOverlay from "../components/voice/VoiceRecordingOverlay";
 import VoicePermissionSheet from "../components/voice/VoicePermissionSheet";
-import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useTagCatalog } from "@/hooks/useTagCatalog";
 import { Loader2 } from "lucide-react";
 
@@ -33,87 +33,62 @@ export default function Home() {
 
   // Voice
   const [voiceState, setVoiceState] = useState(VOICE_IDLE);
-  const [liveTranscript, setLiveTranscript] = useState("");
+  const [transcribing, setTranscribing] = useState(false);
   const [voiceText, setVoiceText] = useState(null); // text to open WriteScreen with
-  const userLangRef = useRef("en");
 
   const queryClient = useQueryClient();
   const { tagById, categoryByKey } = useTagCatalog();
 
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ["entries"],
-    queryFn: async () => {
-      // Opportunistically load user language
-      try {
-        const me = await base44.auth.me();
-        if (me?.language) userLangRef.current = me.language;
-      } catch { /* ok */ }
-      return base44.entities.Entry.list("-created_date", 100);
-    },
+    queryFn: () => base44.entities.Entry.list("-created_date", 100),
   });
 
   const groups = groupEntriesByDay(entries);
 
-  // ── Speech recognition ───────────────────────────────────────
-  const langCode = userLangRef.current === "he" ? "he-IL" : "en-US";
-
-  const handleTranscript = useCallback((text) => setLiveTranscript(text), []);
-
-  const handleResult = useCallback((text) => {
-    setVoiceState(VOICE_IDLE);
-    setLiveTranscript("");
-    // Always open write screen — even if empty the user can type
-    setVoiceText(text);
+  // ── Audio recorder + Whisper transcription ───────────────────
+  const handleAudioResult = useCallback(async (blob) => {
+    setTranscribing(true);
+    try {
+      // Upload the audio blob as a File
+      const file = new File([blob], "recording.webm", { type: blob.type });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const transcript = await base44.integrations.Core.TranscribeAudio({ audio_url: file_url });
+      setVoiceText(typeof transcript === "string" ? transcript : transcript?.text ?? "");
+    } catch {
+      // If transcription fails, still open write screen (empty)
+      setVoiceText("");
+    } finally {
+      setTranscribing(false);
+      setVoiceState(VOICE_IDLE);
+    }
   }, []);
 
-  const handleSpeechError = useCallback((msg) => {
-    setVoiceState(
-      msg.includes("permission") || msg.includes("not-allowed")
-        ? VOICE_PERMISSION_ERROR
-        : VOICE_IDLE
-    );
-    setLiveTranscript("");
-    // On generic error still open write screen with whatever was captured
-    if (!msg.includes("permission") && !msg.includes("not-allowed")) {
-      setVoiceText(liveTranscript || "");
-    }
-  }, [liveTranscript]);
+  const handleAudioError = useCallback((err) => {
+    setVoiceState(err === "permission" ? VOICE_PERMISSION_ERROR : VOICE_NOT_SUPPORTED);
+  }, []);
 
-  const { isSupported, start: startRecognition, stop: stopRecognition } =
-    useSpeechRecognition({
-      language: langCode,
-      onTranscript: handleTranscript,
-      onResult: handleResult,
-      onError: handleSpeechError,
-    });
+  const { start: startRecording, stop: stopRecording, cancel: cancelRecording } =
+    useAudioRecorder({ onResult: handleAudioResult, onError: handleAudioError });
 
-  const handleMicPress = async () => {
-    if (!isSupported) {
+  const handleMicPress = () => {
+    if (typeof MediaRecorder === "undefined") {
       setVoiceState(VOICE_NOT_SUPPORTED);
       return;
     }
-    // Request permission by attempting to get mic
-    try {
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch {
-      setVoiceState(VOICE_PERMISSION_ERROR);
-      return;
-    }
-    setLiveTranscript("");
     setVoiceState(VOICE_RECORDING);
-    startRecognition();
+    startRecording();
   };
 
   const handleVoiceStop = () => {
-    stopRecognition();
-    // onResult will fire after stop
-    // If it doesn't fire (e.g. no speech), fall through with empty
+    stopRecording();
+    // handleAudioResult will fire, which sets transcribing=true
   };
 
   const handleVoiceCancel = () => {
-    stopRecognition();
+    cancelRecording();
+    setTranscribing(false);
     setVoiceState(VOICE_IDLE);
-    setLiveTranscript("");
   };
 
   // ── Create ──────────────────────────────────────────────────
@@ -270,7 +245,7 @@ export default function Home() {
       {/* Voice recording overlay */}
       {voiceState === VOICE_RECORDING && (
         <VoiceRecordingOverlay
-          transcript={liveTranscript}
+          transcribing={transcribing}
           onStop={handleVoiceStop}
           onCancel={handleVoiceCancel}
         />
