@@ -9,6 +9,20 @@
         "he"
       ],
       "default": "en"
+    },
+    "theme": {
+      "type": "string",
+      "enum": [
+        "cream",
+        "sky",
+        "sage",
+        "blossom",
+        "lavender",
+        "mint",
+        "sand",
+        "charcoal"
+      ],
+      "default": "cream"
     }
   }
 }

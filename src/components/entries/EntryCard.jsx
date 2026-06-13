@@ -4,15 +4,15 @@ import MiniTagChip from "@/components/tags/MiniTagChip";
 import EntryMenu from "./EntryMenu";
 import EntryMediaPreview from "./EntryMediaPreview";
 
-const MOOD_COLORS = [
-  "bg-rose-300", "bg-amber-300", "bg-lime-300",
-  "bg-teal-300", "bg-sky-300", "bg-violet-300", "bg-pink-300",
+const MOOD_HEX = [
+  "#F87171", "#FBBF24", "#86EFAC",
+  "#5EEAD4", "#7DD3FC", "#C4B5FD", "#F9A8D4",
 ];
 
 function moodColor(id = "") {
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  return MOOD_COLORS[Math.abs(hash) % MOOD_COLORS.length];
+  return MOOD_HEX[Math.abs(hash) % MOOD_HEX.length];
 }
 
 const MAX_VISIBLE_TAGS = 3;
@@ -20,7 +20,7 @@ const MAX_VISIBLE_TAGS = 3;
 export default function EntryCard({ entry, onClick, onEdit, onDelete, tagById, categoryByKey }) {
   const date = getEntryDate(entry);
   const timeStr = format(date, "HH:mm");
-  const dot = moodColor(entry.id);
+  const dotColor = moodColor(entry.id);
 
   const tagIds = entry.tag_ids || [];
   const visibleIds = tagIds.slice(0, MAX_VISIBLE_TAGS);
@@ -33,7 +33,7 @@ export default function EntryCard({ entry, onClick, onEdit, onDelete, tagById, c
       {/* Meta row with menu */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${dot}`} />
+          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: dotColor }} />
           <span className="text-xs font-body font-medium text-muted-foreground tabular-nums">
             {timeStr}
           </span>

@@ -15,6 +15,7 @@ import VoicePermissionSheet from "../components/voice/VoicePermissionSheet";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useTagCatalog } from "@/hooks/useTagCatalog";
 import { Loader2 } from "lucide-react";
+import ThemePickerSheet from "@/components/ThemePickerSheet";
 
 // Voice states
 const VOICE_IDLE = "idle";
@@ -29,6 +30,7 @@ export default function Home() {
   const [deletingEntry, setDeletingEntry] = useState(null);
   const [undoEntry, setUndoEntry] = useState(null);
   const undoTimerRef = useRef(null);
+  const [themePickerOpen, setThemePickerOpen] = useState(false);
 
   // Voice
   const [voiceState, setVoiceState] = useState(VOICE_IDLE);
@@ -172,9 +174,21 @@ export default function Home() {
       {/* Header */}
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border/40">
         <div className="max-w-lg mx-auto px-5 py-4">
-          <h1 className="text-2xl font-heading font-semibold tracking-tight text-foreground">
-            My Life
-          </h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-heading font-semibold tracking-tight text-foreground">
+              My Life
+            </h1>
+            {/* Palette dot */}
+            <button
+              onClick={() => setThemePickerOpen(true)}
+              aria-label="Change theme"
+              className="w-8 h-8 rounded-full flex-shrink-0 active:scale-90 transition-transform"
+              style={{
+                background: "conic-gradient(from 0deg, #EF7E3A, #E86A8C, #9A8FD0, #5AA9D6, #6FBF8F, #EF7E3A)",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.18)",
+              }}
+            />
+          </div>
         </div>
       </header>
 
@@ -283,6 +297,11 @@ export default function Home() {
           onWriteInstead={() => { setVoiceState(VOICE_IDLE); setWriting(true); }}
           onDismiss={() => setVoiceState(VOICE_IDLE)}
         />
+      )}
+
+      {/* Theme picker */}
+      {themePickerOpen && (
+        <ThemePickerSheet onClose={() => setThemePickerOpen(false)} />
       )}
     </div>
   );

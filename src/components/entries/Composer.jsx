@@ -30,8 +30,11 @@ export default function Composer({ onOpen }) {
       {/* Bottom row: paperclip hint + pencil */}
       <div className="flex items-center justify-between mt-4">
         <Paperclip className="w-4 h-4 text-muted-foreground/40" strokeWidth={2} />
-        <span className="w-10 h-10 rounded-full bg-foreground flex items-center justify-center">
-          <Pencil className="w-4 h-4 text-background" strokeWidth={2} />
+        <span
+          className="w-10 h-10 rounded-full flex items-center justify-center"
+          style={{ background: "var(--theme-accent, #C08743)" }}
+        >
+          <Pencil className="w-4 h-4" style={{ color: "#fff" }} strokeWidth={2} />
         </span>
       </div>
     </button>
