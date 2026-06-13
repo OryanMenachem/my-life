@@ -1,5 +1,18 @@
 import { useState } from "react";
-import { Search } from "lucide-react";
+import {
+  Search,
+  Sun, Moon, Heart, Zap, Wind, Cloud,
+  Briefcase, Users, User, HeartPulse, BookOpen,
+  Home, TreePine, Plane, Lightbulb, Mountain, Star, Crosshair,
+} from "lucide-react";
+
+const ICON_MAP = {
+  "sun": Sun, "moon": Moon, "heart": Heart, "zap": Zap, "wind": Wind, "cloud": Cloud,
+  "briefcase": Briefcase, "users": Users, "user": User, "heart-pulse": HeartPulse,
+  "book-open": BookOpen, "home": Home, "tree-pine": TreePine, "plane": Plane,
+  "lightbulb": Lightbulb, "mountain": Mountain,
+  "star": Star, "crosshair": Crosshair,
+};
 
 export default function AllTagsSheet({ categories, tags, selectedTagIds, onClose }) {
   const [localSelected, setLocalSelected] = useState(selectedTagIds);
@@ -61,6 +74,7 @@ export default function AllTagsSheet({ categories, tags, selectedTagIds, onClose
                   {tagsByCategory[cat.system_key].map((tag) => {
                     const color = cat.color ?? "#888888";
                     const selected = localSelected.includes(tag.id);
+                    const IconComponent = tag.icon ? ICON_MAP[tag.icon] : null;
                     return (
                       <button
                         key={tag.id}
@@ -72,6 +86,7 @@ export default function AllTagsSheet({ categories, tags, selectedTagIds, onClose
                             : { backgroundColor: `${color}15`, borderColor: `${color}55`, color }
                         }
                       >
+                        {IconComponent && <IconComponent size={10} strokeWidth={2} />}
                         {tag.name_en}
                       </button>
                     );
