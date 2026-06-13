@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { X } from "lucide-react";
 import { getEntryDate } from "@/utils/groupEntriesByDay";
 import MiniTagChip from "@/components/tags/MiniTagChip";
-import EntryMediaGallery from "./EntryMediaGallery";
+import MediaCarousel from "./MediaCarousel";
 
 export default function EntryDetail({ entry, onClose, tagById, categoryByKey }) {
   const date = getEntryDate(entry);
@@ -45,7 +45,7 @@ export default function EntryDetail({ entry, onClose, tagById, categoryByKey }) 
         ) : null}
 
         {/* Media */}
-        <EntryMediaGallery media={entry.media} />
+        <MediaCarousel media={entry.media} />
 
         {/* Tags */}
         {tagIds.length > 0 && (

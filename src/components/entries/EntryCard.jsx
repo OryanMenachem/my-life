@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { getEntryDate } from "@/utils/groupEntriesByDay";
 import MiniTagChip from "@/components/tags/MiniTagChip";
 import EntryMenu from "./EntryMenu";
-import EntryMediaPreview from "./EntryMediaPreview";
+import MediaCarousel from "./MediaCarousel";
 import { highlightText } from "@/utils/searchHighlight";
 
 const MAX_VISIBLE_TAGS = 3;
@@ -24,7 +24,7 @@ export default function EntryCard({ entry, onClick, onEdit, onDelete, tagById, c
     <div className="w-full relative" style={{ backgroundColor: "#FFFFFF" }}>
       {/* ── Full-width media at top (flush, no padding) ── */}
       {hasMedia && (
-        <EntryMediaPreview media={entry.media} flush />
+        <MediaCarousel media={entry.media} flush />
       )}
 
       {/* ── Meta row + kebab menu ── */}
