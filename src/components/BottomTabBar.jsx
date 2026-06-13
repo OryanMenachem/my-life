@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, Search } from "lucide-react";
+import { BookOpen, Search, CalendarDays } from "lucide-react";
 
 const TABS = [
-  { path: "/",       label: "Journal", Icon: BookOpen },
-  { path: "/search", label: "Search",  Icon: Search   },
+  { path: "/",          label: "Journal",  Icon: BookOpen     },
+  { path: "/calendar",  label: "Calendar", Icon: CalendarDays },
+  { path: "/search",    label: "Search",   Icon: Search       },
 ];
 
 export default function BottomTabBar() {

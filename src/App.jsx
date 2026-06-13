@@ -16,6 +16,7 @@ import ResetPassword from '@/pages/ResetPassword';
 import Home from '@/pages/Home';
 import Tags from '@/pages/Tags';
 import Search from '@/pages/Search';
+import CalendarPage from '@/pages/Calendar';
 import AppLayout from '@/components/AppLayout';
 
 const AuthenticatedApp = () => {
@@ -51,6 +52,7 @@ const AuthenticatedApp = () => {
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<AppLayout />}>
           <Route path="/" element={<Home />} />
+          <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/search" element={<Search />} />
           <Route path="/tags" element={<Tags />} />
         </Route>
