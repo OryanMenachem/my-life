@@ -21,9 +21,9 @@ export default function DayGroup({ label, entries, onEntryClick, onEditEntry, on
       </div>
 
       {/* Cards flush white block, hairline separators */}
-      <div className="bg-card">
-        {entries.map((entry, i) => (
-          <div key={entry.id}>
+      <div className="flex flex-col gap-[5px]">
+        {entries.map((entry) => (
+          <div key={entry.id} className="bg-card">
             <EntryCard
               entry={entry}
               onClick={() => onEntryClick(entry)}
@@ -32,9 +32,6 @@ export default function DayGroup({ label, entries, onEntryClick, onEditEntry, on
               tagById={tagById}
               categoryByKey={categoryByKey}
             />
-            {i < entries.length - 1 && (
-              <div className="h-px bg-border" />
-            )}
           </div>
         ))}
       </div>
