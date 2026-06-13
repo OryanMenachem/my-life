@@ -1,6 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, Plus, X, Trash2 } from "lucide-react";
+import { Loader2, Plus, X, Trash2, Sun, Moon, Heart, Zap, Wind, Cloud, Briefcase, Users, User, HeartPulse, BookOpen, Home, TreePine, Plane, Lightbulb } from "lucide-react";
+
+const ICON_MAP = {
+  "sun": Sun, "moon": Moon, "heart": Heart, "zap": Zap, "wind": Wind, "cloud": Cloud,
+  "briefcase": Briefcase, "users": Users, "user": User, "heart-pulse": HeartPulse,
+  "book-open": BookOpen, "home": Home, "tree-pine": TreePine, "plane": Plane, "lightbulb": Lightbulb,
+};
 import { useTagCatalog } from "@/hooks/useTagCatalog";
 import { useMediaUploader } from "@/hooks/useMediaUploader";
 import TagPickerSheet from "@/components/tags/TagPickerSheet";
@@ -180,6 +186,7 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
                   className="inline-flex items-center gap-[5px] px-[11px] rounded-full text-[11.5px] font-body font-medium border border-dashed whitespace-nowrap active:scale-95 transition-all"
                   style={{ height: "27px", backgroundColor: s.bg, borderColor: s.bd, color: s.fg }}
                 >
+                  {tag.icon && (() => { const I = ICON_MAP[tag.icon]; return I ? <I size={10} strokeWidth={2} /> : null; })()}
                   {tag.name_en}
                   <X className="w-3 h-3" />
                 </button>
