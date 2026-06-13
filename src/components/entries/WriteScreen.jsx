@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, Plus, X } from "lucide-react";
+import { Loader2, Plus, X, Trash2 } from "lucide-react";
 import { useTagCatalog } from "@/hooks/useTagCatalog";
 import { useMediaUploader } from "@/hooks/useMediaUploader";
 import TagPickerSheet from "@/components/tags/TagPickerSheet";
@@ -12,7 +12,7 @@ import MediaRow from "./MediaRow";
  * source: "text" | "voice" — stored on the entry when creating.
  * initialText: pre-filled text (e.g. from voice transcription).
  */
-export default function WriteScreen({ onSave, onCancel, entry = null, source = "text", initialText = "" }) {
+export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, source = "text", initialText = "" }) {
   const isEdit = !!entry;
 
   const [text, setText] = useState(entry?.content ?? initialText);
@@ -120,8 +120,20 @@ export default function WriteScreen({ onSave, onCancel, entry = null, source = "
         </div>
       )}
 
-      {/* Text area */}
+      {/* Scrollable body */}
       <div className="flex-1 overflow-y-auto px-5 pt-5 pb-2">
+        {/* Entry meta (date dot) */}
+        {isEdit && (
+          <div className="flex items-center gap-2 mb-4">
+            <span className="w-2 h-2 rounded-full bg-muted-foreground/30 flex-shrink-0" />
+            <span className="text-xs font-body text-muted-foreground">
+              {entry?.entry_date
+                ? new Date(entry.entry_date).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })
+                : ""}
+            </span>
+          </div>
+        )}
+
         <textarea
           ref={textareaRef}
           value={text}
@@ -145,37 +157,54 @@ export default function WriteScreen({ onSave, onCancel, entry = null, source = "
             Uploading…
           </p>
         )}
-      </div>
 
-      {/* Tags row */}
-      <div className="px-5 pb-4 flex-shrink-0 border-t border-border/40 pt-3">
-        <div className="flex flex-wrap gap-2 items-center">
-          {selectedTagIds.map((id) => {
-            const tag = tagById[id];
-            if (!tag) return null;
-            const cat = categoryByKey[tag.category_key];
-            const color = cat?.color ?? "#888888";
-            return (
-              <button
-                key={id}
-                onClick={() => removeTag(id)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-body font-medium border whitespace-nowrap active:scale-95 transition-all"
-                style={{ backgroundColor: color, borderColor: color, color: "#fff" }}
-              >
-                {tag.name_en}
-                <X className="w-3 h-3" />
-              </button>
-            );
-          })}
-          <button
-            onClick={() => setPickerOpen(true)}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-body font-medium border border-dashed border-muted-foreground/40 text-muted-foreground hover:border-muted-foreground/70 transition-colors whitespace-nowrap"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            tag
-          </button>
+        {/* Tags label + chips */}
+        <div className="mt-5">
+          <p className="text-[11px] font-body font-semibold uppercase tracking-widest text-muted-foreground/60 mb-2">Tags</p>
+          <div className="flex flex-wrap gap-2 items-center">
+            {selectedTagIds.map((id) => {
+              const tag = tagById[id];
+              if (!tag) return null;
+              const cat = categoryByKey[tag.category_key];
+              const color = cat?.color ?? "#888888";
+              return (
+                <button
+                  key={id}
+                  onClick={() => removeTag(id)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-body font-medium border whitespace-nowrap active:scale-95 transition-all"
+                  style={{ backgroundColor: color, borderColor: color, color: "#fff" }}
+                >
+                  {tag.name_en}
+                  <X className="w-3 h-3" />
+                </button>
+              );
+            })}
+            <button
+              onClick={() => setPickerOpen(true)}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-body font-medium border border-dashed border-muted-foreground/40 text-muted-foreground hover:border-muted-foreground/70 transition-colors whitespace-nowrap"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              tag
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Bottom bar — edit mode only: hint + delete */}
+      {isEdit && (
+        <div className="flex items-center justify-between px-5 py-3 border-t border-border/40 flex-shrink-0">
+          <span className="text-xs font-body text-muted-foreground/60">Tap a photo to remove it</span>
+          {onDelete && (
+            <button
+              onClick={onDelete}
+              className="w-8 h-8 flex items-center justify-center rounded-full text-destructive hover:bg-destructive/10 transition-colors"
+              aria-label="Delete entry"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Tag picker sheet */}
       {pickerOpen && (

@@ -1,12 +1,18 @@
-import { useEffect, useRef } from "react";
-import { MoreHorizontal } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+// Vertical kebab (⋯) SVG
+const KebabIcon = () => (
+  <svg viewBox="0 0 24 24" width="16" height="16">
+    <circle cx="12" cy="5" r="1.6" fill="currentColor" />
+    <circle cx="12" cy="12" r="1.6" fill="currentColor" />
+    <circle cx="12" cy="19" r="1.6" fill="currentColor" />
+  </svg>
+);
 
 export default function EntryMenu({ onEdit, onDelete }) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
 
-  // Close on outside click
   useEffect(() => {
     if (!open) return;
     const handler = (e) => {
@@ -27,7 +33,7 @@ export default function EntryMenu({ onEdit, onDelete }) {
         className="w-7 h-7 flex items-center justify-center rounded-full text-muted-foreground hover:bg-muted transition-colors"
         aria-label="Entry options"
       >
-        <MoreHorizontal className="w-4 h-4" />
+        <KebabIcon />
       </button>
 
       {open && (
