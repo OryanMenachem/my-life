@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { getEntryDate } from "@/utils/groupEntriesByDay";
 import MiniTagChip from "@/components/tags/MiniTagChip";
 import EntryMenu from "./EntryMenu";
+import EntryMediaPreview from "./EntryMediaPreview";
 
 const MOOD_COLORS = [
   "bg-rose-300", "bg-amber-300", "bg-lime-300",
@@ -42,12 +43,19 @@ export default function EntryCard({ entry, onClick, onEdit, onDelete, tagById, c
 
       {/* Content — tappable area */}
       <button onClick={onClick} className="w-full text-left focus:outline-none">
-        <p className="font-heading text-[15px] leading-relaxed text-foreground line-clamp-3">
-          {entry.content}
-        </p>
-        {entry.content.length > 160 && (
-          <span className="text-xs text-muted-foreground/70 font-body mt-1 inline-block">… more</span>
-        )}
+        {entry.content ? (
+          <>
+            <p className="font-heading text-[15px] leading-relaxed text-foreground line-clamp-3">
+              {entry.content}
+            </p>
+            {entry.content.length > 160 && (
+              <span className="text-xs text-muted-foreground/70 font-body mt-1 inline-block">… more</span>
+            )}
+          </>
+        ) : null}
+
+        {/* Media preview */}
+        <EntryMediaPreview media={entry.media} />
 
         {/* Tags */}
         {visibleIds.length > 0 && (

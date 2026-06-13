@@ -1,4 +1,4 @@
-import { Pencil } from "lucide-react";
+import { Pencil, Paperclip } from "lucide-react";
 import useLiveClock from "@/hooks/useLiveClock";
 
 export default function Composer({ onOpen }) {
@@ -27,8 +27,9 @@ export default function Composer({ onOpen }) {
         What's on your mind right now?
       </p>
 
-      {/* Pencil button */}
-      <div className="flex justify-end mt-4">
+      {/* Bottom row: paperclip hint + pencil */}
+      <div className="flex items-center justify-between mt-4">
+        <Paperclip className="w-4 h-4 text-muted-foreground/40" strokeWidth={2} />
         <span className="w-10 h-10 rounded-full bg-foreground flex items-center justify-center">
           <Pencil className="w-4 h-4 text-background" strokeWidth={2} />
         </span>

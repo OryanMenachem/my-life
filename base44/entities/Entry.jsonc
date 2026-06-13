@@ -4,7 +4,7 @@
   "properties": {
     "content": {
       "type": "string",
-      "minLength": 1,
+      "minLength": 0,
       "maxLength": 5000,
       "description": "The entry text"
     },
@@ -37,6 +37,51 @@
       },
       "default": [],
       "description": "IDs of selected Tag records"
+    },
+    "updated_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last time this entry was edited"
+    },
+    "media": {
+      "type": "array",
+      "default": [],
+      "description": "Attached photos and videos",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "photo",
+              "video"
+            ]
+          },
+          "url": {
+            "type": "string"
+          },
+          "thumbnail_url": {
+            "type": "string"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "duration_seconds": {
+            "type": "number"
+          },
+          "sort_order": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "type",
+          "url",
+          "sort_order"
+        ]
+      }
     }
   },
   "required": [

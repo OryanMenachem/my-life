@@ -2,7 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Loader2, Plus, X } from "lucide-react";
 import { useTagCatalog } from "@/hooks/useTagCatalog";
+import { useMediaUploader } from "@/hooks/useMediaUploader";
 import TagPickerSheet from "@/components/tags/TagPickerSheet";
+import MediaRow from "./MediaRow";
 
 /**
  * Used for both creating (entry=null) and editing (entry=existing).
@@ -14,11 +16,14 @@ export default function WriteScreen({ onSave, onCancel, entry = null }) {
   const [text, setText] = useState(entry?.content ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [mediaError, setMediaError] = useState("");
   const [selectedTagIds, setSelectedTagIds] = useState(entry?.tag_ids ?? []);
   const [pickerOpen, setPickerOpen] = useState(false);
   const textareaRef = useRef(null);
 
   const { categories, tags, categoryByKey, tagById } = useTagCatalog();
+  const { items: mediaItems, addFiles, removeItem, retryItem, readyMedia, hasUploading } =
+    useMediaUploader(entry?.media ?? []);
 
   useEffect(() => {
     const id = setTimeout(() => textareaRef.current?.focus(), 80);
@@ -26,7 +31,14 @@ export default function WriteScreen({ onSave, onCancel, entry = null }) {
   }, []);
 
   const trimmed = text.trim();
-  const canSave = trimmed.length > 0 && !saving;
+  const hasContent = trimmed.length > 0 || readyMedia.length > 0;
+  const canSave = hasContent && !saving;
+
+  const handleAddFiles = async (files) => {
+    setMediaError("");
+    const errors = await addFiles(files);
+    if (errors.length > 0) setMediaError(errors.join(" "));
+  };
 
   const handleSave = async () => {
     if (!canSave) return;
@@ -38,6 +50,7 @@ export default function WriteScreen({ onSave, onCancel, entry = null }) {
         savedEntry = await base44.entities.Entry.update(entry.id, {
           content: trimmed,
           tag_ids: selectedTagIds,
+          media: readyMedia,
           updated_date: new Date().toISOString(),
         });
       } else {
@@ -45,15 +58,14 @@ export default function WriteScreen({ onSave, onCancel, entry = null }) {
         try {
           const me = await base44.auth.me();
           if (me?.language) language = me.language;
-        } catch {
-          // use default
-        }
+        } catch { /* use default */ }
         savedEntry = await base44.entities.Entry.create({
           content: trimmed,
           source: "text",
           entry_date: new Date().toISOString(),
           language,
           tag_ids: selectedTagIds,
+          media: readyMedia,
         });
       }
       onSave(savedEntry);
@@ -94,22 +106,43 @@ export default function WriteScreen({ onSave, onCancel, entry = null }) {
         </button>
       </div>
 
-      {/* Error banner */}
+      {/* Error banners */}
       {error && (
         <div className="mx-5 mt-3 px-4 py-2.5 rounded-xl bg-destructive/10 text-destructive text-sm font-body flex-shrink-0">
           {error}
         </div>
       )}
+      {mediaError && (
+        <div className="mx-5 mt-2 px-4 py-2.5 rounded-xl bg-destructive/10 text-destructive text-sm font-body flex-shrink-0">
+          {mediaError}
+        </div>
+      )}
 
       {/* Text area */}
-      <div className="flex-1 overflow-y-auto px-5 pt-5 pb-4">
+      <div className="flex-1 overflow-y-auto px-5 pt-5 pb-2">
         <textarea
           ref={textareaRef}
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Start writing…"
-          className="w-full h-full min-h-[40vh] resize-none bg-transparent outline-none font-heading text-[18px] leading-[1.75] text-foreground placeholder:text-muted-foreground/40 placeholder:italic"
+          className="w-full min-h-[30vh] resize-none bg-transparent outline-none font-heading text-[18px] leading-[1.75] text-foreground placeholder:text-muted-foreground/40 placeholder:italic"
         />
+
+        {/* Media row */}
+        <div className="mt-3 pb-2">
+          <MediaRow
+            items={mediaItems}
+            onAddFiles={handleAddFiles}
+            onRemove={removeItem}
+            onRetry={retryItem}
+          />
+        </div>
+
+        {hasUploading && (
+          <p className="text-xs font-body text-muted-foreground mt-1">
+            Uploading…
+          </p>
+        )}
       </div>
 
       {/* Tags row */}

@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { X } from "lucide-react";
 import { getEntryDate } from "@/utils/groupEntriesByDay";
 import MiniTagChip from "@/components/tags/MiniTagChip";
+import EntryMediaGallery from "./EntryMediaGallery";
 
 export default function EntryDetail({ entry, onClose, tagById, categoryByKey }) {
   const date = getEntryDate(entry);
@@ -28,9 +29,14 @@ export default function EntryDetail({ entry, onClose, tagById, categoryByKey }) 
         <p className="text-xs font-body text-muted-foreground mb-5 tracking-wide">
           {fullDateTime}
         </p>
-        <p className="font-heading text-[18px] leading-[1.8] text-foreground whitespace-pre-wrap">
-          {entry.content}
-        </p>
+        {entry.content ? (
+          <p className="font-heading text-[18px] leading-[1.8] text-foreground whitespace-pre-wrap">
+            {entry.content}
+          </p>
+        ) : null}
+
+        {/* Media */}
+        <EntryMediaGallery media={entry.media} />
 
         {/* Tags */}
         {tagIds.length > 0 && (

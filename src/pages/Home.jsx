@@ -69,6 +69,8 @@ export default function Home() {
       setUndoEntry(null);
       try {
         await base44.entities.Entry.delete(entry.id);
+        // Media files in Base44 storage are cleaned up server-side when the entry is deleted.
+        // No client-side file deletion API is needed.
       } catch {
         // Restore on failure
         queryClient.setQueryData(["entries"], (old = []) =>
