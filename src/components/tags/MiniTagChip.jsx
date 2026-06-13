@@ -1,8 +1,7 @@
 import {
   Sun, Moon, Heart, Zap, Wind, Cloud,
   Briefcase, Users, User, HeartPulse, BookOpen,
-  Home, TreePine, Plane,
-  Lightbulb,
+  Home, TreePine, Plane, Lightbulb, Mountain,
 } from "lucide-react";
 
 // Map lucide icon name strings → components
@@ -22,6 +21,7 @@ const ICON_MAP = {
   "tree-pine": TreePine,
   "plane": Plane,
   "lightbulb": Lightbulb,
+  "mountain": Mountain,
 };
 
 // Category-specific warm palette from spec

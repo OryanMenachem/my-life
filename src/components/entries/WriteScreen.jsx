@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, Plus, X, Trash2, Sun, Moon, Heart, Zap, Wind, Cloud, Briefcase, Users, User, HeartPulse, BookOpen, Home, TreePine, Plane, Lightbulb } from "lucide-react";
+import { Loader2, Plus, X, Trash2, Sun, Moon, Heart, Zap, Wind, Cloud, Briefcase, Users, User, HeartPulse, BookOpen, Home, TreePine, Plane, Lightbulb, Mountain } from "lucide-react";
 
 const ICON_MAP = {
   "sun": Sun, "moon": Moon, "heart": Heart, "zap": Zap, "wind": Wind, "cloud": Cloud,
   "briefcase": Briefcase, "users": Users, "user": User, "heart-pulse": HeartPulse,
-  "book-open": BookOpen, "home": Home, "tree-pine": TreePine, "plane": Plane, "lightbulb": Lightbulb,
+  "book-open": BookOpen, "home": Home, "tree-pine": TreePine, "plane": Plane,
+  "lightbulb": Lightbulb, "mountain": Mountain,
 };
 import { useTagCatalog } from "@/hooks/useTagCatalog";
 import { useMediaUploader } from "@/hooks/useMediaUploader";
