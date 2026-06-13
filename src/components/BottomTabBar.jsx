@@ -30,9 +30,7 @@ const SettingsIcon = ({ sw }) => (
 
 const AnalysisIcon = ({ sw }) => (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="3 3 7 7 10 4 14 8 21 1" />
-    <polyline points="21 1 21 7 15 7" />
-    <path d="M3 13v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-8" />
+    <path d="M3 12h4l2-5 4 10 2-5h6" />
   </svg>
 );
 
