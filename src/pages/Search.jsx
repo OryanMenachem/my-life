@@ -155,14 +155,14 @@ export default function Search() {
       </div>
 
       {/* Content */}
-      <main className="max-w-lg mx-auto px-4 pb-24">
+      <main className="pb-24">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
           </div>
         ) : !showResults ? (
           /* Idle state: show a prompt */
-          <div className="flex flex-col items-center justify-center py-20 text-center px-6">
+          <div className="flex flex-col items-center justify-center py-20 text-center">
             <p className="font-heading text-[17px] text-muted-foreground/60 italic">
               Search your journal…
             </p>
@@ -188,30 +188,33 @@ export default function Search() {
           </>
         ) : (
           <>
-            <ActiveFilterRow
-               query={rawQuery}
-               selectedTagIds={selectedTagIds}
-               timeFilter={timeFilter}
-               tagById={tagById}
-               categoryByKey={categoryByKey}
-               onRemoveQuery={() => setRawQuery("")}
-               onRemoveTag={(id) => setSelectedTagIds((p) => p.filter((x) => x !== id))}
-               onRemoveTime={() => { setTimeFilter("all"); setCustomRange(null); }}
-               onClearAll={clearAll}
-             />
-             {groups.map((group) => (
-               <div key={group.dayKey} className="mt-4">
-                 <DayGroup
-                   label={group.label}
-                   entries={group.entries}
-                   onEntryClick={setSelectedEntry}
-                   onEditEntry={setEditingEntry}
-                   onDeleteEntry={handleDeleteRequest}
-                   tagById={tagById}
-                   categoryByKey={categoryByKey}
-                 />
-               </div>
-             ))}
+            <div className="max-w-lg mx-auto px-4">
+              <ActiveFilterRow
+                query={rawQuery}
+                selectedTagIds={selectedTagIds}
+                timeFilter={timeFilter}
+                tagById={tagById}
+                categoryByKey={categoryByKey}
+                onRemoveQuery={() => setRawQuery("")}
+                onRemoveTag={(id) => setSelectedTagIds((p) => p.filter((x) => x !== id))}
+                onRemoveTime={() => { setTimeFilter("all"); setCustomRange(null); }}
+                onClearAll={clearAll}
+              />
+            </div>
+            <div className="mt-4">
+              {groups.map((group) => (
+                <DayGroup
+                  key={group.dayKey}
+                  label={group.label}
+                  entries={group.entries}
+                  onEntryClick={setSelectedEntry}
+                  onEditEntry={setEditingEntry}
+                  onDeleteEntry={handleDeleteRequest}
+                  tagById={tagById}
+                  categoryByKey={categoryByKey}
+                />
+              ))}
+            </div>
           </>
         )}
       </main>
