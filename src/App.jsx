@@ -19,6 +19,7 @@ import Home from '@/pages/Home';
 import Tags from '@/pages/Tags';
 import Search from '@/pages/Search';
 import CalendarPage from '@/pages/Calendar';
+import Analysis from '@/pages/Analysis';
 import Settings from '@/pages/Settings';
 import AppLayout from '@/components/AppLayout';
 import OnboardingGate from '@/components/onboarding/OnboardingGate';
@@ -67,6 +68,7 @@ const AuthenticatedApp = () => {
               <Route path="/" element={<Home />} />
               <Route path="/calendar" element={<CalendarPage />} />
               <Route path="/search" element={<Search />} />
+              <Route path="/analysis" element={<Analysis />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/tags" element={<Tags />} />
             </Route>

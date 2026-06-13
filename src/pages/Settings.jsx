@@ -79,10 +79,10 @@ export default function Settings() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border/40">
-        <div className="max-w-lg mx-auto px-5 py-4">
-          <h1 className="text-2xl font-heading font-semibold tracking-tight text-foreground">
-            Settings
+      <header className="sticky top-0 z-10 bg-card border-b border-border">
+        <div className="max-w-lg mx-auto px-4 py-3 text-center">
+          <h1 className="font-heading text-[21px] font-semibold tracking-[-0.5px] text-foreground uppercase">
+            SETTINGS
           </h1>
         </div>
       </header>

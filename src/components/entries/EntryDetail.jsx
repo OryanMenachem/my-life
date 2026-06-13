@@ -11,10 +11,15 @@ export default function EntryDetail({ entry, onClose, tagById, categoryByKey }) 
   const tagIds = entry.tag_ids || [];
 
   return (
-    <div className="fixed inset-0 z-50 bg-background flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-border/40 flex-shrink-0">
-        <span className="text-sm font-body font-semibold text-foreground">Entry</span>
+    <div className="fixed inset-0 z-40 bg-black/40 flex items-end">
+      <div className="w-full bg-card rounded-t-2xl flex flex-col max-h-[90vh]">
+      {/* Grip */}
+      <div className="flex justify-center pt-2 pb-2">
+        <div className="w-12 h-1 rounded-full bg-muted"></div>
+      </div>
+
+      {/* Close button */}
+      <div className="flex justify-end px-5 pb-2">
         <button
           onClick={onClose}
           className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
@@ -25,7 +30,7 @@ export default function EntryDetail({ entry, onClose, tagById, categoryByKey }) 
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto px-5 pt-6 pb-10">
+      <div className="flex-1 overflow-y-auto px-5 pb-6">
         <p className="text-xs font-body text-muted-foreground mb-5 tracking-wide">
           {fullDateTime}
         </p>
@@ -53,6 +58,7 @@ export default function EntryDetail({ entry, onClose, tagById, categoryByKey }) 
             })}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

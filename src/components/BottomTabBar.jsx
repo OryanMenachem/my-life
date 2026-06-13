@@ -23,15 +23,23 @@ const CalIcon = ({ sw }) => (
 
 const SettingsIcon = ({ sw }) => (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 7h-7M6 7H4M20 17h-2M11 17H4" />
-    <circle cx="10" cy="7" r="2.4" />
-    <circle cx="14" cy="17" r="2.4" />
+    <circle cx="12" cy="12" r="3" />
+    <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24" />
+  </svg>
+);
+
+const AnalysisIcon = ({ sw }) => (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="3 3 7 7 10 4 14 8 21 1" />
+    <polyline points="21 1 21 7 15 7" />
+    <path d="M3 13v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-8" />
   </svg>
 );
 
 const TABS = [
   { path: "/",         label: "Journal",  Icon: HomeIcon     },
   { path: "/search",   label: "Search",   Icon: SearchIcon   },
+  { path: "/analysis", label: "Analysis", Icon: AnalysisIcon },
   { path: "/calendar", label: "Calendar", Icon: CalIcon      },
   { path: "/settings", label: "Settings", Icon: SettingsIcon },
 ];

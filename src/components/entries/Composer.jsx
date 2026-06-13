@@ -26,28 +26,28 @@ export default function Composer({ onOpen }) {
     >
       {/* Time row */}
       <div className="flex items-center gap-2 mb-4">
-        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: "#cfcabf" }} />
-        <span className="text-xs font-body font-semibold tabular-nums" style={{ color: "#6e685f" }}>
+        <span className="w-2 h-2 rounded-full flex-shrink-0" className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: "var(--theme-muted-dot)" }} />
+        <span className="text-xs font-body font-semibold tabular-nums" style={{ color: "var(--theme-soft)" }}>
           {time}
         </span>
-        <span className="text-[10px] font-body font-semibold uppercase tracking-widest" style={{ color: "#8c867c" }}>
+        <span className="text-[10px] font-body font-semibold uppercase tracking-widest" style={{ color: "var(--theme-soft2)" }}>
           now
         </span>
       </div>
 
       {/* Placeholder */}
-      <p className="font-heading italic text-[19px] leading-snug flex-1" style={{ color: "#aaa49a" }}>
+      <p className="font-heading italic text-[19px] leading-snug flex-1 text-foreground/50">
         What's on your mind right now?
       </p>
 
       {/* Bottom row: straight pin + round pencil button */}
       <div className="flex items-center justify-between mt-3">
-        <span style={{ color: "#6e685f" }}>
+        <span style={{ color: "var(--theme-soft)" }}>
           <PinIcon />
         </span>
         <span
           className="w-[34px] h-[34px] rounded-full flex items-center justify-center flex-shrink-0"
-          style={{ background: "#f6ecdd" }}
+          style={{ background: "var(--theme-accent-soft)" }}
         >
           <PencilIcon />
         </span>
