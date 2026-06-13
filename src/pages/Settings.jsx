@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import {
   User, LogOut, Palette, Globe, Download, Trash2, Lock,
-  Info, Pencil, Check, X, Sparkles
+  Info, Pencil, Check, X, Sparkles, Camera, Loader2
 } from "lucide-react";
 import { useTheme, THEMES } from "@/lib/ThemeContext";
 import { useLang } from "@/lib/LanguageContext";
@@ -12,6 +12,7 @@ import SettingsRow from "@/components/settings/SettingsRow";
 import ThemePickerSheet from "@/components/ThemePickerSheet";
 import AppLockSheet from "@/components/settings/AppLockSheet";
 import DeleteAccountSheet from "@/components/settings/DeleteAccountSheet";
+import Avatar, { DEFAULTS } from "@/components/Avatar";
 import { Switch } from "@/components/ui/switch";
 
 const APP_VERSION = "1.0.0";
@@ -34,6 +35,10 @@ export default function Settings() {
   const [savingName, setSavingName] = useState(false);
   const [autoTagging, setAutoTagging] = useState(false);
   const [togglingAI, setTogglingAI] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState("");
+  const fileInputRef = useRef(null);
 
   const [themeSheet, setThemeSheet] = useState(false);
   const [lockSheet, setLockSheet] = useState(false);
@@ -45,6 +50,7 @@ export default function Settings() {
       setMe(u);
       setNameVal(u?.full_name || "");
       setAutoTagging(u?.auto_ai_tagging || false);
+      setAvatarUrl(u?.avatar_url || null);
     }).catch(() => {});
   }, []);
 
@@ -58,6 +64,46 @@ export default function Settings() {
       setAutoTagging(!checked);
     }
     setTogglingAI(false);
+  };
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarError("");
+
+    // Validate type
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowed.includes(file.type)) {
+      setAvatarError("Please choose a JPG, PNG, or WebP image.");
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.auth.updateMe({ avatar_url: file_url });
+      setAvatarUrl(file_url);
+      setMe((prev) => ({ ...prev, avatar_url: file_url }));
+      // Notify AppLayout to refresh
+      if (window.__refreshAvatar) window.__refreshAvatar();
+    } catch {
+      setAvatarError("Upload failed — please try again.");
+    }
+    setUploadingAvatar(false);
+    // Reset input so same file can be re-chosen
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const selectDefaultAvatar = async (key) => {
+    setAvatarError("");
+    try {
+      await base44.auth.updateMe({ avatar_url: key });
+      setAvatarUrl(key);
+      setMe((prev) => ({ ...prev, avatar_url: key }));
+      if (window.__refreshAvatar) window.__refreshAvatar();
+    } catch {
+      setAvatarError("Couldn't save avatar — please try again.");
+    }
   };
 
   const saveName = async () => {
@@ -104,6 +150,68 @@ export default function Settings() {
       </header>
 
       <main className="max-w-lg mx-auto px-5 py-5 pb-28">
+        {/* ── My Profile ── */}
+        <SettingsSection title="My Profile">
+          {/* Large avatar + upload */}
+          <div className="px-5 py-5 flex flex-col items-center gap-4">
+            <div className="relative">
+              {uploadingAvatar ? (
+                <div className="w-[88px] h-[88px] rounded-full bg-muted flex items-center justify-center">
+                  <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
+                </div>
+              ) : (
+                <Avatar avatarUrl={avatarUrl} userName={me?.full_name} size={88} />
+              )}
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-foreground text-background flex items-center justify-center shadow-md hover:opacity-90 transition-opacity active:scale-95"
+                aria-label="Upload photo"
+                disabled={uploadingAvatar}
+              >
+                <Camera className="w-4 h-4" />
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleAvatarUpload}
+                className="hidden"
+              />
+            </div>
+            {avatarError && (
+              <p className="text-xs font-body text-destructive">{avatarError}</p>
+            )}
+          </div>
+
+          {/* Default avatars */}
+          <div className="px-5 pb-5">
+            <p className="text-[11px] font-body font-semibold uppercase tracking-widest text-muted-foreground/60 mb-3">
+              Choose a default
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {Object.keys(DEFAULTS).map((key) => {
+                const selected = avatarUrl === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => selectDefaultAvatar(key)}
+                    className={`rounded-full transition-all active:scale-95 ${
+                      selected ? "" : "hover:opacity-80"
+                    }`}
+                    style={{
+                      outline: selected ? "2px solid hsl(var(--accent-foreground))" : "none",
+                      outlineOffset: "3px",
+                    }}
+                    aria-label={`Default avatar ${key.split("-")[1]}`}
+                  >
+                    <Avatar avatarUrl={key} userName="" size={48} />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </SettingsSection>
+
         {/* ── Account ── */}
         <SettingsSection title="Account">
           {/* Name row */}

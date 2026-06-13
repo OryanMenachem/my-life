@@ -35,6 +35,9 @@
     "auto_ai_tagging": {
       "type": "boolean",
       "default": false
+    },
+    "avatar_url": {
+      "type": "string"
     }
   }
 }
