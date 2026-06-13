@@ -51,11 +51,10 @@ export default function LinkCard({ item, onRemove, compact = false }) {
   if (!onRemove) {
     return (
       <a
-        href={item.url}
+        href={normalizeUrl(item.url)}
         target="_blank"
         rel="noopener noreferrer"
-        className="block"
-        onClick={(e) => e.stopPropagation()}
+        className="block cursor-pointer"
       >
         {card}
       </a>
@@ -65,9 +64,16 @@ export default function LinkCard({ item, onRemove, compact = false }) {
   return card;
 }
 
+function normalizeUrl(url) {
+  if (!url) return "";
+  const trimmed = url.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
 function extractDomain(url) {
   try {
-    const u = new URL(url);
+    const u = new URL(normalizeUrl(url));
     return u.hostname.replace(/^www\./, "");
   } catch {
     return url;
