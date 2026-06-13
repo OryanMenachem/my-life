@@ -50,6 +50,7 @@ export default function MiniTagChip({ tag, category }) {
 
   return (
     <span
+      title={tag.description || ""}
       className="inline-flex items-center gap-[4px] px-[9px] rounded-full text-[10px] font-body font-medium border border-dashed whitespace-nowrap"
       style={{
         height: "22px",

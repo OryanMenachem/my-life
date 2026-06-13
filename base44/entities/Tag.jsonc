@@ -23,6 +23,10 @@
     "is_active": {
       "type": "boolean",
       "default": true
+    },
+    "description": {
+      "type": "string",
+      "description": "Explains the meaning of this tag: when to use it, when not to, and an example. Used by AI auto-tagging and shown to users."
     }
   },
   "required": [

@@ -24,11 +24,13 @@ const ICON_MAP = {
 function TagChipSelectable({ tag, category, selected, onToggle }) {
   const color = category?.color ?? "#888888";
   const Icon = tag.icon ? ICON_MAP[tag.icon] : null;
+  const tooltip = tag.description || "";
 
   if (selected) {
     return (
       <button
         onClick={() => onToggle(tag.id)}
+        title={tooltip}
         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-body font-medium border whitespace-nowrap transition-all active:scale-95"
         style={{ backgroundColor: color, borderColor: color, color: "#fff" }}
       >
@@ -41,6 +43,7 @@ function TagChipSelectable({ tag, category, selected, onToggle }) {
   return (
     <button
       onClick={() => onToggle(tag.id)}
+      title={tooltip}
       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-body font-medium border border-dashed whitespace-nowrap transition-all active:scale-95"
       style={{
         backgroundColor: `${color}18`,
