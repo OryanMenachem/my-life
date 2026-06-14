@@ -86,12 +86,6 @@ export function useMediaUploader(initialMedia = []) {
             uploadFile = new File([compressed.blob], file.name, { type: "image/jpeg" });
             width = compressed.width;
             height = compressed.height;
-
-            // Generate a small thumbnail for feed cards
-            const thumb = await compressImage(file, 400, 0.7);
-            const thumbFile = new File([thumb.blob], "thumb.jpg", { type: "image/jpeg" });
-            const thumbRes = await base44.integrations.Core.UploadFile({ file: thumbFile });
-            thumbnail_url = thumbRes.file_url;
           }
 
           if (isVideo) {
@@ -108,7 +102,7 @@ export function useMediaUploader(initialMedia = []) {
 
           updateItem(localId, {
             url: res.file_url,
-            thumbnail_url: thumbnail_url || (isImage ? res.file_url : ""),
+            thumbnail_url: thumbnail_url || "",
             width,
             height,
             duration_seconds,

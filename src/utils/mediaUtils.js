@@ -2,7 +2,7 @@
  * Client-side image compression before upload.
  * Returns a Blob (JPEG) scaled to maxDimension.
  */
-export async function compressImage(file, maxDimension = 1600, quality = 0.82) {
+export async function compressImage(file, maxDimension = 900, quality = 0.90) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
