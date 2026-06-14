@@ -14,7 +14,7 @@ const MAX_VIDEO_SECONDS = 30;
  */
 export function useMediaUploader(initialMedia = []) {
   const [items, setItems] = useState(() =>
-    initialMedia.map((m) => ({ ...m, status: "ready" }))
+    initialMedia.map((m, idx) => ({ ...m, _localId: `saved_${idx}`, status: "ready" }))
   );
 
   const updateItem = useCallback((localId, patch) => {
