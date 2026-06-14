@@ -42,8 +42,7 @@ export default function EntryMenu({ onEdit, onDelete }) {
       {/* dim backdrop */}
       {open && (
         <div
-          className="fixed inset-0 z-20"
-          className="bg-black/5"
+          className="fixed inset-0 z-20 bg-black/5"
           onMouseDown={() => setOpen(false)}
         />
       )}
@@ -58,8 +57,7 @@ export default function EntryMenu({ onEdit, onDelete }) {
 
         {open && (
           <div
-            className="absolute right-0 z-30 overflow-hidden"
-            className="bg-card rounded-[14px] shadow-2xl border border-border"
+            className="absolute right-0 z-30 overflow-hidden bg-card rounded-[14px] shadow-2xl border border-border"
             style={{ top: "28px", width: "150px" }}
           >
             <button
