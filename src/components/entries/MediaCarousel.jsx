@@ -46,8 +46,9 @@ function SingleMedia({ item, flush }) {
           <img
             src={src}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover bg-muted"
             loading="lazy"
+            style={{ aspectRatio: "4/3" }}
           />
         )
       )}

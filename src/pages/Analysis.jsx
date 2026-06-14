@@ -180,16 +180,32 @@ export default function Analysis() {
 
   const { tags, tagById, categoryByKey } = useTagCatalog();
 
-  // Fetch all entries (RLS ensures only current user's entries)
+  // Fetch entries for the selected period (not all)
+  const range = useMemo(() => getPeriodRange(period), [period]);
+
   const { data: entries = [], isLoading } = useQuery({
-    queryKey: ["analysis-entries"],
-    queryFn: () => base44.entities.Entry.filter({}, "-entry_date", 3000),
-    staleTime: 60_000,
+    queryKey: ["analysis-entries", period],
+    queryFn: async () => {
+      if (range.start) {
+        return base44.entities.Entry.filter(
+          { entry_date: { $gte: range.start.toISOString() } },
+          "-entry_date",
+          2000
+        );
+      }
+      return base44.entities.Entry.filter({}, "-entry_date", 2000);
+    },
+    staleTime: 1000 * 60 * 3,
   });
 
-  // Filter by period
-  const range = useMemo(() => getPeriodRange(period), [period]);
-  const periodEntries = useMemo(() => filterByRange(entries, range), [entries, range]);
+  const periodEntries = entries;
+
+  // Lightweight fetch for on-this-day (needs all-time data)
+  const { data: allTimeEntries = [] } = useQuery({
+    queryKey: ["analysis-alltime"],
+    queryFn: () => base44.entities.Entry.filter({}, "-entry_date", 2000),
+    staleTime: 1000 * 60 * 10,
+  });
 
   // ─── Compute all metrics ───
   const metrics = useMemo(() => {
@@ -267,14 +283,14 @@ export default function Analysis() {
     // Hours
     const hours = computeHours(periodEntries);
 
-    // Streaks (from all entries, not just period)
-    const streakData = computeStreaks(entries);
+    // Streaks (from all-time entries for accuracy)
+    const streakData = computeStreaks(allTimeEntries);
 
     // On this day entries (same month+day, previous years)
     const today = new Date();
     const thisMonth = today.getMonth();
     const thisDay = today.getDate();
-    const onThisDay = entries.filter((e) => {
+    const onThisDay = allTimeEntries.filter((e) => {
       const d = new Date(e.entry_date);
       return d.getMonth() === thisMonth && d.getDate() === thisDay && d.getFullYear() !== today.getFullYear();
     }).sort((a, b) => new Date(b.entry_date) - new Date(a.entry_date)).slice(0, 5);
@@ -292,7 +308,7 @@ export default function Analysis() {
       onThisDay,
       isEmpty: false,
     };
-  }, [periodEntries, entries, tags, tagById, categoryByKey, period]);
+  }, [periodEntries, allTimeEntries, tags, tagById, categoryByKey, period]);
 
   const isEmpty = !isLoading && (!entries.length || !periodEntries.length);
 

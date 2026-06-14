@@ -59,13 +59,46 @@ export default function Home() {
   const [transcribing, setTranscribing] = useState(false);
   const [voiceText, setVoiceText] = useState(null); // text to open WriteScreen with
 
+  const PAGE_SIZE = 25;
+
+  const [loadedCount, setLoadedCount] = useState(PAGE_SIZE);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
   const queryClient = useQueryClient();
   const { tagById, categoryByKey } = useTagCatalog();
 
-  const { data: entries = [], isLoading } = useQuery({
+  const { data: initialEntries = [], isLoading } = useQuery({
     queryKey: ["entries"],
-    queryFn: () => base44.entities.Entry.list("-created_date", 100),
+    queryFn: () => base44.entities.Entry.list("-created_date", PAGE_SIZE),
   });
+
+  // Merge initial + lazy-loaded entries
+  const entries = initialEntries;
+
+  // When initial entries count equals page size, there may be more
+  useEffect(() => {
+    if (!isLoading && initialEntries.length < PAGE_SIZE) {
+      setHasMore(false);
+    }
+  }, [isLoading, initialEntries.length]);
+
+  const handleLoadMore = async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const current = queryClient.getQueryData(["entries"]) || [];
+      const nextCount = Math.max(current.length + PAGE_SIZE, PAGE_SIZE);
+      const more = await base44.entities.Entry.list("-created_date", nextCount);
+      queryClient.setQueryData(["entries"], more);
+      setLoadedCount(more.length);
+      if (more.length <= current.length) setHasMore(false);
+    } catch {
+      // Keep existing data
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const groups = groupEntriesByDay(entries);
 
@@ -117,9 +150,9 @@ export default function Home() {
   // ── Create ──────────────────────────────────────────────────
   const handleCreate = (newEntry) => {
     queryClient.setQueryData(["entries"], (old = []) => [newEntry, ...old]);
+    setLoadedCount((c) => c + 1);
     setWriting(false);
     setVoiceText(null);
-    queryClient.invalidateQueries({ queryKey: ["entries"] });
   };
 
   // ── Edit ────────────────────────────────────────────────────
@@ -128,7 +161,6 @@ export default function Home() {
       old.map((e) => (e.id === updatedEntry.id ? updatedEntry : e))
     );
     setEditingEntry(null);
-    queryClient.invalidateQueries({ queryKey: ["entries"] });
   };
 
   // ── Delete ──────────────────────────────────────────────────
@@ -214,6 +246,24 @@ export default function Home() {
                 categoryByKey={categoryByKey}
               />
             ))}
+            {hasMore && (
+              <div className="px-4 py-6 flex justify-center">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-full border border-border text-sm font-body font-medium text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50"
+                >
+                  {loadingMore ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Loading…
+                    </>
+                  ) : (
+                    "Load earlier entries"
+                  )}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </main>

@@ -9,8 +9,8 @@ import {
 export function useAllEntries() {
   return useQuery({
     queryKey: ["entries-search"],
-    queryFn: () => base44.entities.Entry.list("-created_date", 500),
-    staleTime: 30_000,
+    queryFn: () => base44.entities.Entry.filter({}, "-created_date", 60),
+    staleTime: 60_000,
   });
 }
 

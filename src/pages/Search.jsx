@@ -35,7 +35,7 @@ export default function Search() {
 
   const queryClient = useQueryClient();
 
-  const query = useDebounce(rawQuery, 180);
+  const query = useDebounce(rawQuery, 280);
 
   const { data: entries = [], isLoading } = useAllEntries();
   const { categories, tags, tagById, categoryByKey } = useTagCatalog();
