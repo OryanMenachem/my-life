@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, Plus, X, Trash2, Link as LinkIcon, Mic, Sun, Moon, Heart, Zap, Wind, Cloud, Briefcase, Users, User, HeartPulse, BookOpen, Home, TreePine, Plane, Lightbulb, Mountain, Star, Crosshair, UtensilsCrossed, GlassWater, Coffee, Waves, Umbrella, Compass, Sailboat, MapPin, Ticket, Leaf, Trees, ShoppingBag, Film, Music, Landmark, Sparkles } from "lucide-react";
+import { Loader2, Plus, X, Trash2, Link as LinkIcon, Sun, Moon, Heart, Zap, Wind, Cloud, Briefcase, Users, User, HeartPulse, BookOpen, Home, TreePine, Plane, Lightbulb, Mountain, Star, Crosshair, UtensilsCrossed, GlassWater, Coffee, Waves, Umbrella, Compass, Sailboat, MapPin, Ticket, Leaf, Trees, ShoppingBag, Film, Music, Landmark, Sparkles } from "lucide-react";
 
 const ICON_MAP = {
   "sun": Sun, "moon": Moon, "heart": Heart, "zap": Zap, "wind": Wind, "cloud": Cloud,
@@ -22,6 +22,7 @@ import TagPickerSheet from "@/components/tags/TagPickerSheet";
 import AutoTagButton from "@/components/tags/AutoTagButton";
 import VoiceRecordingOverlay from "@/components/voice/VoiceRecordingOverlay";
 import VoicePermissionSheet from "@/components/voice/VoicePermissionSheet";
+import VoiceMicButton from "@/components/voice/VoiceMicButton";
 import MediaRow from "./MediaRow";
 import LinkCard from "./LinkCard";
 
@@ -385,24 +386,14 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
         </div>
       </div>
 
-      {/* Bottom bar — edit mode only: hint + mic + delete */}
+      {/* Bottom bar — edit mode only: hint + delete */}
       {isEdit && (
         <div className="flex items-center px-5 pt-3 pb-3 border-t border-border/40 flex-shrink-0">
           <span className="text-[11px] font-body" style={{ color: "#8c867c" }}>Tap a photo to remove it</span>
-          {/* Voice record button — same style as Home mic */}
-          <button
-            onClick={handleMicPress}
-            disabled={voiceState !== "idle"}
-            className="ml-auto mr-2 w-9 h-9 rounded-full flex items-center justify-center active:scale-95 transition-transform flex-shrink-0 disabled:opacity-40"
-            style={{ backgroundColor: "#171717", color: "#fff" }}
-            aria-label="Record voice"
-          >
-            <Mic className="w-[15px] h-[15px]" strokeWidth={2} />
-          </button>
           {onDelete && (
             <button
               onClick={onDelete}
-              className="w-10 h-10 flex items-center justify-center transition-colors"
+              className="ml-auto w-10 h-10 flex items-center justify-center transition-colors"
               style={{ borderRadius: "11px", background: "#f7eceb", color: "#b1493f" }}
               aria-label="Delete entry"
             >
@@ -410,6 +401,11 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
             </button>
           )}
         </div>
+      )}
+
+      {/* Floating mic button — identical to Home, shown in edit mode when idle */}
+      {isEdit && voiceState === "idle" && (
+        <VoiceMicButton onClick={handleMicPress} />
       )}
 
       {/* Tag picker sheet */}
