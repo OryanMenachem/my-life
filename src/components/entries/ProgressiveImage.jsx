@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 
 /**
- * Single-request blur-up image: shows a blurred version of the same image
- * while it loads, then transitions to sharp. No extra thumbnail needed.
+ * Two-layer cross-fade: a blurred placeholder underneath, and a sharp
+ * image that fades in on top once decoded. Same src for both so the
+ * browser reuses a single network request.
  */
 export default function ProgressiveImage({
   src,
@@ -15,16 +16,16 @@ export default function ProgressiveImage({
 }) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
-  const imgRef = useRef(null);
+  const sharpRef = useRef(null);
 
   useEffect(() => {
     setLoaded(false);
     setError(false);
   }, [src]);
 
-  // Handle browser-cached images that fire onLoad before mount
+  // Catch browser-cached images whose onLoad fires before mount
   useEffect(() => {
-    const el = imgRef.current;
+    const el = sharpRef.current;
     if (el && el.complete && el.naturalWidth > 0) {
       setLoaded(true);
     }
@@ -35,11 +36,8 @@ export default function ProgressiveImage({
     onLoadProp?.();
   };
 
-  const handleError = () => {
-    setError(true);
-  };
+  const handleError = () => setError(true);
 
-  // Avoid conflicting position classes — callers supply absolute via containerClassName
   const needsRelative = !containerClassName.includes("absolute") && !containerClassName.includes("fixed");
 
   if (!src || error) {
@@ -56,16 +54,28 @@ export default function ProgressiveImage({
       className={`${needsRelative ? "relative" : ""} overflow-hidden bg-muted ${containerClassName}`}
       style={aspectRatio ? { aspectRatio } : undefined}
     >
+      {/* Blurred placeholder — fades out when sharp image is ready */}
       <img
-        ref={imgRef}
+        src={src}
+        alt=""
+        aria-hidden="true"
+        decoding="async"
+        className={`absolute inset-0 w-full h-full object-cover blur-xl scale-110 transition-opacity duration-[300ms] ease-in-out ${
+          loaded ? "opacity-0" : "opacity-100"
+        }`}
+      />
+
+      {/* Sharp image — fades in on top */}
+      <img
+        ref={sharpRef}
         src={src}
         alt={alt}
         onLoad={handleLoad}
         onError={handleError}
         decoding="async"
         loading={priority ? "eager" : "lazy"}
-        className={`w-full h-full object-cover transition-all duration-200 ease-out ${
-          loaded ? "blur-none scale-100" : "blur-xl scale-110"
+        className={`w-full h-full object-cover transition-opacity duration-[300ms] ease-in-out ${
+          loaded ? "opacity-100" : "opacity-0"
         } ${className}`}
       />
     </div>

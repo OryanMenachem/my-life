@@ -4,13 +4,12 @@ import { formatDuration } from "@/utils/mediaUtils";
 import ProgressiveImage from "./ProgressiveImage";
 
 /**
- * Swipeable media carousel with CSS scroll-snap.
+ * Swipeable media carousel.
  * - 1 item: rendered plainly (no dots, no arrows).
  * - 2+ items: carousel with dots, arrows, and counter.
- * - Mixed photo/video: video shows thumbnail + play; plays inline.
+ * - Swipe always moves exactly one slide with fluid 1:1 finger tracking.
  */
 export default function MediaCarousel({ media, flush = false }) {
-  // Only handle photo/video — links render separately
   const visual = (media || []).filter((m) => m.type !== "link");
   if (visual.length === 0) return null;
 
@@ -63,7 +62,9 @@ function MultiMedia({ slides, flush }) {
   const scrollRef = useRef(null);
   const videoRefs = useRef({});
   const touchStartX = useRef(0);
+  const touchStartScroll = useRef(0);
   const isSwiping = useRef(false);
+  const animFrame = useRef(null);
 
   const total = slides.length;
   const isAtStart = active === 0;
@@ -71,16 +72,20 @@ function MultiMedia({ slides, flush }) {
 
   const clampIndex = (idx) => Math.max(0, Math.min(total - 1, idx));
 
-  /* Snaps to exact index — called after every swipe or arrow click */
+  /* Animate to target slide with eased scrolling */
   const snapTo = useCallback((el, idx) => {
     const target = clampIndex(idx);
+    el.style.scrollBehavior = "smooth";
     el.scrollTo({ left: target * el.clientWidth, behavior: "smooth" });
+    // Reset to auto after the smooth animation ends so future programmatic
+    // scrolls don't animate unexpectedly
+    setTimeout(() => { el.style.scrollBehavior = "auto"; }, 400);
   }, []);
 
-  /* Detect active from scroll position (precise, not momentum-prone since we drive it) */
+  /* Detect active from scroll position */
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
-    if (!el) return;
+    if (!el || isSwiping.current) return;
     const w = el.clientWidth;
     if (w === 0) return;
     const raw = el.scrollLeft / w;
@@ -90,25 +95,46 @@ function MultiMedia({ slides, flush }) {
     }
   }, [active, clampIndex]);
 
-  /* Touch handlers — single-step swipe */
+  /* ── Touch: 1:1 finger tracking ── */
   const handleTouchStart = useCallback((e) => {
+    const el = scrollRef.current;
+    if (!el) return;
     touchStartX.current = e.touches[0].clientX;
+    touchStartScroll.current = el.scrollLeft;
     isSwiping.current = true;
+    // Kill any in-progress smooth scroll so finger tracking is instant
+    el.style.scrollBehavior = "auto";
+    if (animFrame.current) cancelAnimationFrame(animFrame.current);
+  }, []);
+
+  const handleTouchMove = useCallback((e) => {
+    if (!isSwiping.current) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    const deltaX = touchStartX.current - e.touches[0].clientX;
+    animFrame.current = requestAnimationFrame(() => {
+      el.scrollLeft = touchStartScroll.current + deltaX;
+    });
   }, []);
 
   const handleTouchEnd = useCallback((e) => {
     if (!isSwiping.current) return;
     isSwiping.current = false;
+    if (animFrame.current) cancelAnimationFrame(animFrame.current);
     const el = scrollRef.current;
     if (!el) return;
+
     const deltaX = touchStartX.current - e.changedTouches[0].clientX;
-    const threshold = 30; // minimum px to count as a swipe
+    const w = el.clientWidth;
+    const threshold = w * 0.2; // 20% of slide width
+
     if (Math.abs(deltaX) < threshold) {
-      // Tiny movement — snap back to current
+      // Snap back to current slide
       snapTo(el, active);
       return;
     }
-    // Advance exactly one slide in the swipe direction
+
+    // Advance exactly one slide
     const step = deltaX > 0 ? 1 : -1;
     const next = clampIndex(active + step);
     setActive(next);
@@ -119,9 +145,7 @@ function MultiMedia({ slides, flush }) {
   useEffect(() => {
     if (playingVideoIdx !== null && playingVideoIdx !== active) {
       const videoEl = videoRefs.current[playingVideoIdx];
-      if (videoEl) {
-        videoEl.pause();
-      }
+      if (videoEl) videoEl.pause();
       setPlayingVideoIdx(null);
     }
   }, [active, playingVideoIdx]);
@@ -165,9 +189,11 @@ function MultiMedia({ slides, flush }) {
           style={{
             aspectRatio: "4/3",
             touchAction: "pan-y",
+            scrollBehavior: "auto",
           }}
           onScroll={handleScroll}
           onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           tabIndex={0}
           role="region"
@@ -236,7 +262,7 @@ function MultiMedia({ slides, flush }) {
           })}
         </div>
 
-        {/* Left arrow — hidden at start */}
+        {/* Left arrow */}
         {!isAtStart && (
           <button
             onClick={() => goTo(active - 1)}
@@ -247,7 +273,7 @@ function MultiMedia({ slides, flush }) {
           </button>
         )}
 
-        {/* Right arrow — hidden at end */}
+        {/* Right arrow */}
         {!isAtEnd && (
           <button
             onClick={() => goTo(active + 1)}
