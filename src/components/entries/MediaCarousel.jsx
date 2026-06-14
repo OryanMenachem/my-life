@@ -49,7 +49,6 @@ function SingleMedia({ item, flush }) {
             alt=""
             priority
             containerClassName="absolute inset-0"
-            className="!absolute inset-0"
           />
         )
       )}
@@ -192,7 +191,6 @@ function MultiMedia({ slides, flush }) {
                     alt=""
                     priority={idx === 0}
                     containerClassName="absolute inset-0"
-                    className="!absolute inset-0"
                   />
                 )}
 

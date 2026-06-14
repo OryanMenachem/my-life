@@ -24,7 +24,6 @@ export default function EntryMediaPreview({ media, flush = false }) {
           src={src}
           alt=""
           containerClassName="absolute inset-0"
-          className="!absolute inset-0"
         />
       )}
 

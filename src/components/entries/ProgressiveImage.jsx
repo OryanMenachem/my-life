@@ -14,10 +14,12 @@ export default function ProgressiveImage({
   onLoad: onLoadProp,
 }) {
   const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
   const imgRef = useRef(null);
 
   useEffect(() => {
     setLoaded(false);
+    setError(false);
   }, [src]);
 
   // Handle browser-cached images that fire onLoad before mount
@@ -33,24 +35,39 @@ export default function ProgressiveImage({
     onLoadProp?.();
   };
 
+  const handleError = () => {
+    setError(true);
+  };
+
+  // Avoid conflicting position classes — callers supply absolute via containerClassName
+  const needsRelative = !containerClassName.includes("absolute") && !containerClassName.includes("fixed");
+
+  if (!src || error) {
+    return (
+      <div
+        className={`overflow-hidden bg-muted ${containerClassName}`}
+        style={aspectRatio ? { aspectRatio } : undefined}
+      />
+    );
+  }
+
   return (
     <div
-      className={`relative overflow-hidden bg-muted ${containerClassName}`}
+      className={`${needsRelative ? "relative" : ""} overflow-hidden bg-muted ${containerClassName}`}
       style={aspectRatio ? { aspectRatio } : undefined}
     >
-      {src && (
-        <img
-          ref={imgRef}
-          src={src}
-          alt={alt}
-          onLoad={handleLoad}
-          decoding="async"
-          loading={priority ? "eager" : "lazy"}
-          className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out ${
-            loaded ? "blur-none scale-100" : "blur-xl scale-110"
-          } ${className}`}
-        />
-      )}
+      <img
+        ref={imgRef}
+        src={src}
+        alt={alt}
+        onLoad={handleLoad}
+        onError={handleError}
+        decoding="async"
+        loading={priority ? "eager" : "lazy"}
+        className={`w-full h-full object-cover transition-all duration-700 ease-out ${
+          loaded ? "blur-none scale-100" : "blur-xl scale-110"
+        } ${className}`}
+      />
     </div>
   );
 }
