@@ -62,22 +62,58 @@ function MultiMedia({ slides, flush }) {
   const [playingVideoIdx, setPlayingVideoIdx] = useState(null);
   const scrollRef = useRef(null);
   const videoRefs = useRef({});
+  const touchStartX = useRef(0);
+  const isSwiping = useRef(false);
 
   const total = slides.length;
   const isAtStart = active === 0;
   const isAtEnd = active === total - 1;
 
-  /* Track active index from scroll position */
+  const clampIndex = (idx) => Math.max(0, Math.min(total - 1, idx));
+
+  /* Snaps to exact index — called after every swipe or arrow click */
+  const snapTo = useCallback((el, idx) => {
+    const target = clampIndex(idx);
+    el.scrollTo({ left: target * el.clientWidth, behavior: "smooth" });
+  }, []);
+
+  /* Detect active from scroll position (precise, not momentum-prone since we drive it) */
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
     const w = el.clientWidth;
     if (w === 0) return;
-    const idx = Math.round(el.scrollLeft / w);
-    if (idx !== active && idx >= 0 && idx < total) {
+    const raw = el.scrollLeft / w;
+    const idx = clampIndex(Math.round(raw));
+    if (idx !== active) {
       setActive(idx);
     }
-  }, [active, total]);
+  }, [active, clampIndex]);
+
+  /* Touch handlers — single-step swipe */
+  const handleTouchStart = useCallback((e) => {
+    touchStartX.current = e.touches[0].clientX;
+    isSwiping.current = true;
+  }, []);
+
+  const handleTouchEnd = useCallback((e) => {
+    if (!isSwiping.current) return;
+    isSwiping.current = false;
+    const el = scrollRef.current;
+    if (!el) return;
+    const deltaX = touchStartX.current - e.changedTouches[0].clientX;
+    const threshold = 30; // minimum px to count as a swipe
+    if (Math.abs(deltaX) < threshold) {
+      // Tiny movement — snap back to current
+      snapTo(el, active);
+      return;
+    }
+    // Advance exactly one slide in the swipe direction
+    const step = deltaX > 0 ? 1 : -1;
+    const next = clampIndex(active + step);
+    setActive(next);
+    snapTo(el, next);
+  }, [active, clampIndex, snapTo]);
 
   /* Pause video when swiping away */
   useEffect(() => {
@@ -95,20 +131,27 @@ function MultiMedia({ slides, flush }) {
     const el = scrollRef.current;
     if (!el) return;
     const onKey = (e) => {
-      if (e.key === "ArrowLeft") scrollTo(el, active - 1);
-      if (e.key === "ArrowRight") scrollTo(el, active + 1);
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        const next = clampIndex(active - 1);
+        setActive(next);
+        snapTo(el, next);
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        const next = clampIndex(active + 1);
+        setActive(next);
+        snapTo(el, next);
+      }
     };
     el.addEventListener("keydown", onKey);
     return () => el.removeEventListener("keydown", onKey);
-  }, [active]);
-
-  const scrollTo = (el, idx) => {
-    if (idx < 0 || idx >= total) return;
-    el.scrollTo({ left: idx * el.clientWidth, behavior: "smooth" });
-  };
+  }, [active, clampIndex, snapTo]);
 
   const goTo = (idx) => {
-    scrollTo(scrollRef.current, idx);
+    const next = clampIndex(idx);
+    setActive(next);
+    snapTo(scrollRef.current, next);
   };
 
   return (
@@ -118,12 +161,14 @@ function MultiMedia({ slides, flush }) {
         {/* Scroll container */}
         <div
           ref={scrollRef}
-          className={`flex overflow-x-auto snap-x snap-mandatory scrollbar-none w-full ${flush ? "" : "rounded-2xl"}`}
+          className={`flex overflow-x-hidden scrollbar-none w-full ${flush ? "" : "rounded-2xl"}`}
           style={{
             aspectRatio: "4/3",
-            touchAction: "pan-x",
+            touchAction: "pan-y",
           }}
           onScroll={handleScroll}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
           tabIndex={0}
           role="region"
           aria-label={`Image carousel, ${total} slides`}
@@ -136,7 +181,7 @@ function MultiMedia({ slides, flush }) {
             return (
               <div
                 key={idx}
-                className="flex-shrink-0 w-full snap-start relative bg-muted"
+                className="flex-shrink-0 w-full relative bg-muted"
                 style={{ aspectRatio: "4/3" }}
               >
                 {/* Photo or video poster */}
