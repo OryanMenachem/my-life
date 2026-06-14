@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, Plus, X, Trash2, Link as LinkIcon, Sun, Moon, Heart, Zap, Wind, Cloud, Briefcase, Users, User, HeartPulse, BookOpen, Home, TreePine, Plane, Lightbulb, Mountain, Star, Crosshair, UtensilsCrossed, GlassWater, Coffee, Waves, Umbrella, Compass, Sailboat, MapPin, Ticket, Leaf, Trees, ShoppingBag, Film, Music, Landmark, Sparkles } from "lucide-react";
+import { Loader2, Plus, X, Trash2, Link as LinkIcon, Mic, Sun, Moon, Heart, Zap, Wind, Cloud, Briefcase, Users, User, HeartPulse, BookOpen, Home, TreePine, Plane, Lightbulb, Mountain, Star, Crosshair, UtensilsCrossed, GlassWater, Coffee, Waves, Umbrella, Compass, Sailboat, MapPin, Ticket, Leaf, Trees, ShoppingBag, Film, Music, Landmark, Sparkles } from "lucide-react";
 
 const ICON_MAP = {
   "sun": Sun, "moon": Moon, "heart": Heart, "zap": Zap, "wind": Wind, "cloud": Cloud,
@@ -16,9 +16,12 @@ const ICON_MAP = {
 };
 import { useTagCatalog } from "@/hooks/useTagCatalog";
 import { useMediaUploader } from "@/hooks/useMediaUploader";
+import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { autoTagEntry } from "@/utils/autoTag";
 import TagPickerSheet from "@/components/tags/TagPickerSheet";
 import AutoTagButton from "@/components/tags/AutoTagButton";
+import VoiceRecordingOverlay from "@/components/voice/VoiceRecordingOverlay";
+import VoicePermissionSheet from "@/components/voice/VoicePermissionSheet";
 import MediaRow from "./MediaRow";
 import LinkCard from "./LinkCard";
 
@@ -46,6 +49,67 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
   const { categories, tags, categoryByKey, tagById } = useTagCatalog();
   const { items: mediaItems, addFiles, addLinkItem, removeItem, retryItem, readyMedia, hasUploading } =
     useMediaUploader(entry?.media ?? []);
+
+  // ── Voice recording ──────────────────────────────────────────
+  const [voiceState, setVoiceState] = useState("idle"); // idle | recording | permission_error | not_supported
+  const [transcribing, setTranscribing] = useState(false);
+
+  const handleAudioResult = useCallback(async (blob) => {
+    setTranscribing(true);
+    try {
+      const file = new File([blob], "recording.webm", { type: blob.type });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const transcript = await base44.integrations.Core.TranscribeAudio({ audio_url: file_url });
+      const result = typeof transcript === "string" ? transcript : transcript?.text ?? "";
+
+      if (result) {
+        const textarea = textareaRef.current;
+        if (textarea) {
+          const cursorPos = textarea.selectionStart;
+          const before = text.substring(0, cursorPos);
+          const after = text.substring(textarea.selectionEnd || cursorPos);
+          const needsSpaceBefore = before.length > 0 && !before.endsWith("\n") && !before.endsWith(" ");
+          const needsSpaceAfter = after.length > 0 && !after.startsWith("\n") && !after.startsWith(" ");
+          const prefix = needsSpaceBefore ? " " : "";
+          const suffix = needsSpaceAfter ? " " : "";
+          const combined = before + prefix + result + suffix + after;
+          setText(combined);
+          // Restore cursor after the inserted text
+          const newPos = cursorPos + prefix.length + result.length + suffix.length;
+          setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(newPos, newPos);
+          }, 50);
+        } else {
+          setText((prev) => {
+            const separator = prev && !prev.endsWith("\n") ? " " : "";
+            return prev + separator + result + " ";
+          });
+        }
+      }
+    } catch {
+      // Failed silently — keep existing text
+    } finally {
+      setTranscribing(false);
+      setVoiceState("idle");
+    }
+  }, [text]);
+
+  const handleAudioError = useCallback((err) => {
+    setVoiceState(err === "permission" ? "permission_error" : "not_supported");
+  }, []);
+
+  const { start: startRecording, stop: stopRecording, cancel: cancelRecording } =
+    useAudioRecorder({ onResult: handleAudioResult, onError: handleAudioError });
+
+  const handleMicPress = () => {
+    if (typeof MediaRecorder === "undefined") {
+      setVoiceState("not_supported");
+      return;
+    }
+    setVoiceState("recording");
+    startRecording();
+  };
 
   useEffect(() => {
     const id = setTimeout(() => textareaRef.current?.focus(), 80);
@@ -321,14 +385,24 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
         </div>
       </div>
 
-      {/* Bottom bar — edit mode only: hint + delete */}
+      {/* Bottom bar — edit mode only: hint + mic + delete */}
       {isEdit && (
         <div className="flex items-center px-5 pt-3 pb-3 border-t border-border/40 flex-shrink-0">
           <span className="text-[11px] font-body" style={{ color: "#8c867c" }}>Tap a photo to remove it</span>
+          {/* Voice record button — same style as Home mic */}
+          <button
+            onClick={handleMicPress}
+            disabled={voiceState !== "idle"}
+            className="ml-auto mr-2 w-9 h-9 rounded-full flex items-center justify-center active:scale-95 transition-transform flex-shrink-0 disabled:opacity-40"
+            style={{ backgroundColor: "#171717", color: "#fff" }}
+            aria-label="Record voice"
+          >
+            <Mic className="w-[15px] h-[15px]" strokeWidth={2} />
+          </button>
           {onDelete && (
             <button
               onClick={onDelete}
-              className="ml-auto w-10 h-10 flex items-center justify-center transition-colors"
+              className="w-10 h-10 flex items-center justify-center transition-colors"
               style={{ borderRadius: "11px", background: "#f7eceb", color: "#b1493f" }}
               aria-label="Delete entry"
             >
@@ -348,6 +422,24 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
             setSelectedTagIds(ids);
             setPickerOpen(false);
           }}
+        />
+      )}
+
+      {/* Voice recording overlay */}
+      {voiceState === "recording" && (
+        <VoiceRecordingOverlay
+          transcribing={transcribing}
+          onStop={stopRecording}
+          onCancel={() => { cancelRecording(); setVoiceState("idle"); }}
+        />
+      )}
+
+      {/* Permission / not-supported sheet */}
+      {(voiceState === "permission_error" || voiceState === "not_supported") && (
+        <VoicePermissionSheet
+          reason={voiceState === "permission_error" ? "denied" : "unsupported"}
+          onWriteInstead={() => setVoiceState("idle")}
+          onDismiss={() => setVoiceState("idle")}
         />
       )}
     </div>
