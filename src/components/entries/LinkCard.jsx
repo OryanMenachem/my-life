@@ -47,21 +47,27 @@ export default function LinkCard({ item, onRemove, compact = false }) {
     </div>
   );
 
-  // If in display mode (no onRemove), make the card tappable
+  // Display mode: tappable link card that opens in a new tab.
+  // Uses an <a> for reliable mobile tap handling.
+  // onClick stopPropagation prevents parent click handlers (e.g., SearchResultCard)
+  // from swallowing the link tap.
   if (!onRemove) {
+    const url = normalizeUrl(item.url);
     return (
       <a
-        href={normalizeUrl(item.url)}
+        href={url}
         target="_blank"
         rel="noopener noreferrer"
         className="block cursor-pointer"
+        onClick={(e) => e.stopPropagation()}
       >
         {card}
       </a>
     );
   }
 
-  return card;
+  // Edit mode: no link behavior, only the ✕ remove button works
+  return <div onClick={(e) => e.stopPropagation()}>{card}</div>;
 }
 
 function normalizeUrl(url) {
