@@ -43,6 +43,16 @@
       "format": "date-time",
       "description": "Last time this entry was edited"
     },
+    "is_imported": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this entry was created via gallery import"
+    },
+    "imported_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this entry was imported from gallery"
+    },
     "media": {
       "type": "array",
       "default": [],
@@ -62,8 +72,7 @@
             "type": "string"
           },
           "title": {
-            "type": "string",
-            "description": "Link title"
+            "type": "string"
           },
           "thumbnail_url": {
             "type": "string"

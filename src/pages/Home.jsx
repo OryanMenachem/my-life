@@ -12,6 +12,7 @@ import UndoSnackbar from "../components/entries/UndoSnackbar";
 import VoiceMicButton from "../components/voice/VoiceMicButton";
 import VoiceRecordingOverlay from "../components/voice/VoiceRecordingOverlay";
 import VoicePermissionSheet from "../components/voice/VoicePermissionSheet";
+import ImportReminderBanner from "../components/ImportReminderBanner";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useTagCatalog } from "@/hooks/useTagCatalog";
 import Avatar from "../components/Avatar";
@@ -190,6 +191,9 @@ export default function Home() {
       {/* Content */}
       <main className="max-w-lg mx-auto flex flex-col">
         <Composer onOpen={() => setWriting(true)} />
+
+        {/* Import reminder banner */}
+        <ImportReminderBanner onDescribe={(entry) => setEditingEntry(entry)} />
 
         {isLoading ? (
           <div className="flex items-center justify-center py-16 px-5">

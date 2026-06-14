@@ -12,16 +12,6 @@
     },
     "theme": {
       "type": "string",
-      "enum": [
-        "cream",
-        "sky",
-        "sage",
-        "blossom",
-        "lavender",
-        "mint",
-        "sand",
-        "charcoal"
-      ],
       "default": "cream"
     },
     "onboarded": {
@@ -38,6 +28,16 @@
     },
     "avatar_url": {
       "type": "string"
+    },
+    "import_reminders_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show gentle reminders to describe imported photo entries"
+    },
+    "last_reminder_shown_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the last import reminder was shown"
     }
   }
 }
