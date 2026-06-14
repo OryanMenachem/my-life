@@ -124,17 +124,17 @@ export default function EntryCard({ entry, onEdit, onDelete, tagById, categoryBy
             {needsTruncation && !textExpanded && (
               <button
                 onClick={handleExpand}
-                className="text-[11.5px] font-body font-medium mt-[2px] transition-colors"
-                style={{ color: "#8c867c" }}
+                className="text-[13px] font-body font-semibold mt-[2px] transition-colors"
+                style={{ color: "#c79a4f" }}
               >
-                …more
+                …
               </button>
             )}
             {textExpanded && (
               <button
                 onClick={handleCollapse}
                 className="text-[11.5px] font-body font-medium mt-[2px] transition-colors"
-                style={{ color: "#8c867c" }}
+                style={{ color: "#c79a4f" }}
               >
                 less
               </button>
