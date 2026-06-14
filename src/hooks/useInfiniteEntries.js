@@ -1,85 +1,100 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useMemo, useCallback } from "react";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 
 const PAGE_SIZE = 25;
+const QUERY_KEY = ["entries-feed"];
 
 /**
- * Cursor-based infinite pagination for entries.
- * Fetches newest-first using created_date as cursor.
+ * Cursor-based infinite pagination for entries using react-query.
+ * Cached across navigation — switching tabs doesn't re-fetch.
  */
 export function useInfiniteEntries() {
-  const [entries, setEntries] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const cursorRef = useRef(null);
-  const hasFetchedOnce = useRef(false);
+  const queryClient = useQueryClient();
 
-  const fetchFirstPage = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const result = await base44.entities.Entry.filter({}, "-created_date", PAGE_SIZE);
-      setEntries(result);
-      setHasMore(result.length === PAGE_SIZE);
-      cursorRef.current = result.length > 0 ? result[result.length - 1].created_date : null;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const fetchNextPage = useCallback(async () => {
-    if (!cursorRef.current || !hasMore || isFetchingMore) return;
-    setIsFetchingMore(true);
-    try {
-      const result = await base44.entities.Entry.filter(
-        { created_date: { $lt: cursorRef.current } },
-        "-created_date",
-        PAGE_SIZE
-      );
-      setEntries((prev) => [...prev, ...result]);
-      setHasMore(result.length === PAGE_SIZE);
-      if (result.length > 0) {
-        cursorRef.current = result[result.length - 1].created_date;
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery({
+    queryKey: QUERY_KEY,
+    queryFn: async ({ pageParam }) => {
+      if (pageParam) {
+        return base44.entities.Entry.filter(
+          { created_date: { $lt: pageParam } },
+          "-created_date",
+          PAGE_SIZE
+        );
       }
-    } finally {
-      setIsFetchingMore(false);
-    }
-  }, [hasMore, isFetchingMore]);
+      return base44.entities.Entry.filter({}, "-created_date", PAGE_SIZE);
+    },
+    getNextPageParam: (lastPage) =>
+      lastPage.length === PAGE_SIZE
+        ? lastPage[lastPage.length - 1].created_date
+        : undefined,
+    initialPageParam: null,
+  });
 
-  useEffect(() => {
-    if (!hasFetchedOnce.current) {
-      hasFetchedOnce.current = true;
-      fetchFirstPage();
-    }
-  }, [fetchFirstPage]);
+  const entries = useMemo(
+    () => (data?.pages ?? []).flat(),
+    [data?.pages]
+  );
 
-  // ── Optimistic update helpers ──
+  // ── Optimistic update helpers via react-query cache ──
+
   const prependEntry = useCallback((entry) => {
-    setEntries((prev) => [entry, ...prev]);
-  }, []);
+    queryClient.setQueryData(QUERY_KEY, (old) => {
+      if (!old) return { pages: [[entry]], pageParams: [null] };
+      const pages = old.pages.map((page, i) => (i === 0 ? [entry, ...page] : page));
+      return { ...old, pages };
+    });
+  }, [queryClient]);
 
   const updateEntry = useCallback((updatedEntry) => {
-    setEntries((prev) => prev.map((e) => (e.id === updatedEntry.id ? updatedEntry : e)));
-  }, []);
+    queryClient.setQueryData(QUERY_KEY, (old) => {
+      if (!old) return old;
+      const pages = old.pages.map((page) =>
+        page.map((e) => (e.id === updatedEntry.id ? updatedEntry : e))
+      );
+      return { ...old, pages };
+    });
+  }, [queryClient]);
 
   const removeEntry = useCallback((entryId) => {
-    setEntries((prev) => prev.filter((e) => e.id !== entryId));
-  }, []);
+    queryClient.setQueryData(QUERY_KEY, (old) => {
+      if (!old) return old;
+      const pages = old.pages.map((page) =>
+        page.filter((e) => e.id !== entryId)
+      );
+      return { ...old, pages };
+    });
+  }, [queryClient]);
 
   const restoreEntry = useCallback((entry) => {
-    setEntries((prev) => {
-      const sorted = [entry, ...prev].sort(
+    queryClient.setQueryData(QUERY_KEY, (old) => {
+      if (!old) return { pages: [[entry]], pageParams: [null] };
+      const all = old.pages.flat();
+      const sorted = [entry, ...all].sort(
         (a, b) => new Date(b.created_date).getTime() - new Date(a.created_date).getTime()
       );
-      return sorted;
+      const pages = [];
+      for (let i = 0; i < sorted.length; i += PAGE_SIZE) {
+        pages.push(sorted.slice(i, i + PAGE_SIZE));
+      }
+      const pageParams = pages.map((_, i) =>
+        i === 0 ? null : pages[i - 1]?.[PAGE_SIZE - 1]?.created_date
+      );
+      return { pages, pageParams };
     });
-  }, []);
+  }, [queryClient]);
 
   return {
     entries,
     isLoading,
-    isFetchingMore,
-    hasMore,
+    isFetchingMore: isFetchingNextPage,
+    hasMore: hasNextPage ?? false,
     fetchNextPage,
     prependEntry,
     updateEntry,

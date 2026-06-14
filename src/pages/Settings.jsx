@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   User, LogOut, Palette, Globe, Download, Trash2, Lock,
   Info, Pencil, Check, X, Sparkles, Camera, Loader2, ImagePlus, Bell
@@ -49,6 +50,7 @@ export default function Settings() {
   const [remindersEnabled, setRemindersEnabled] = useState(true);
   const [togglingReminders, setTogglingReminders] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     base44.auth.me().then((u) => {
@@ -407,7 +409,8 @@ export default function Settings() {
         <ImportFromGallery
           onClose={() => setImportOpen(false)}
           onComplete={() => {
-            if (window.__refreshEntries) window.__refreshEntries();
+            queryClient.invalidateQueries({ queryKey: ["entries-feed"] });
+            queryClient.invalidateQueries({ queryKey: ["search-entries"] });
           }}
         />
       )}

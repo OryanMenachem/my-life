@@ -195,7 +195,7 @@ export default function Analysis() {
       }
       return base44.entities.Entry.filter({}, "-entry_date", 2000);
     },
-    staleTime: 1000 * 60 * 3,
+    staleTime: 1000 * 60 * 5,
   });
 
   const periodEntries = entries;
@@ -203,7 +203,7 @@ export default function Analysis() {
   // Lightweight fetch for on-this-day (needs all-time data)
   const { data: allTimeEntries = [] } = useQuery({
     queryKey: ["analysis-alltime"],
-    queryFn: () => base44.entities.Entry.filter({}, "-entry_date", 2000),
+    queryFn: () => base44.entities.Entry.filter({}, "-entry_date", 500),
     staleTime: 1000 * 60 * 10,
   });
 

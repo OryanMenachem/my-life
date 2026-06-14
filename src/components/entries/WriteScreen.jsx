@@ -37,6 +37,7 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
 
   const [text, setText] = useState(entry?.content ?? initialText);
   const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
   const [error, setError] = useState("");
   const [mediaError, setMediaError] = useState("");
   const [selectedTagIds, setSelectedTagIds] = useState(entry?.tag_ids ?? []);
@@ -162,7 +163,8 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
   };
 
   const handleSave = async () => {
-    if (!canSave) return;
+    if (!canSave || savingRef.current) return;
+    savingRef.current = true;
     setError("");
     setSaving(true);
     try {
@@ -214,6 +216,7 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
     } catch {
       setError("Couldn't save. Your text is safe — please try again.");
       setSaving(false);
+      savingRef.current = false;
     }
   };
 

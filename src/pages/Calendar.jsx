@@ -66,7 +66,7 @@ export default function Calendar() {
     queryClient.setQueryData(["calendar-entries", monthKey], (old = []) => [newEntry, ...old]);
     setWriting(false);
     queryClient.invalidateQueries({ queryKey: ["calendar-entries", monthKey] });
-    queryClient.invalidateQueries({ queryKey: ["entries"] });
+    queryClient.invalidateQueries({ queryKey: ["entries-feed"] });
   };
 
   // ── Edit ────────────────────────────────────────────────────
@@ -76,7 +76,7 @@ export default function Calendar() {
     );
     setEditingEntry(null);
     queryClient.invalidateQueries({ queryKey: ["calendar-entries", monthKey] });
-    queryClient.invalidateQueries({ queryKey: ["entries"] });
+    queryClient.invalidateQueries({ queryKey: ["entries-feed"] });
   };
 
   // ── Delete ──────────────────────────────────────────────────
@@ -87,7 +87,7 @@ export default function Calendar() {
       old.filter((e) => e.id !== entry.id)
     );
     await base44.entities.Entry.delete(entry.id);
-    queryClient.invalidateQueries({ queryKey: ["entries"] });
+    queryClient.invalidateQueries({ queryKey: ["entries-feed"] });
   };
 
   // The day the user wants to add an entry for
