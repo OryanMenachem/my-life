@@ -64,7 +64,7 @@ export default function ProgressiveImage({
         onError={handleError}
         decoding="async"
         loading={priority ? "eager" : "lazy"}
-        className={`w-full h-full object-cover transition-all duration-700 ease-out ${
+        className={`w-full h-full object-cover transition-all duration-200 ease-out ${
           loaded ? "blur-none scale-100" : "blur-xl scale-110"
         } ${className}`}
       />
