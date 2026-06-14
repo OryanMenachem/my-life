@@ -118,7 +118,9 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
   }, []);
 
   const trimmed = text.trim();
-  const hasContent = trimmed.length > 0 || readyMedia.length > 0;
+  const hasText = trimmed.length > 0;
+  const hasMedia = readyMedia.length > 0;
+  const hasContent = hasText || hasMedia;
   const canSave = hasContent && !saving;
 
   const handleAddFiles = async (files) => {
@@ -193,14 +195,14 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
       let savedEntry;
       if (isEdit) {
         savedEntry = await base44.entities.Entry.update(entry.id, {
-          content: trimmed,
+          content: trimmed || "",
           tag_ids: finalTagIds,
           media: readyMedia,
           updated_date: new Date().toISOString(),
         });
       } else {
         savedEntry = await base44.entities.Entry.create({
-          content: trimmed,
+          content: trimmed || "",
           source: source,
           entry_date: new Date().toISOString(),
           language,

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { groupEntriesByDay } from "@/utils/groupEntriesByDay";
@@ -17,6 +17,7 @@ import InfiniteScrollSentinel from "../components/InfiniteScrollSentinel";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useTagCatalog } from "@/hooks/useTagCatalog";
 import Avatar from "../components/Avatar";
+import { useAvatar } from "@/lib/AvatarContext";
 import { Loader2 } from "lucide-react";
 
 // Voice states
@@ -31,28 +32,8 @@ export default function Home() {
   const [editingEntry, setEditingEntry] = useState(null);
   const [deletingEntry, setDeletingEntry] = useState(null);
   const [undoEntry, setUndoEntry] = useState(null);
-  const [avatarUrl, setAvatarUrl] = useState(null);
-  const [userName, setUserName] = useState("");
   const undoTimerRef = useRef(null);
-
-  // Load avatar for Home header only
-  useEffect(() => {
-    base44.auth.me().then((u) => {
-      setAvatarUrl(u?.avatar_url || null);
-      setUserName(u?.full_name || "");
-    }).catch(() => {});
-  }, []);
-
-  // Listen for avatar updates from Settings
-  useEffect(() => {
-    window.__refreshHomeAvatar = () => {
-      base44.auth.me().then((u) => {
-        setAvatarUrl(u?.avatar_url || null);
-        setUserName(u?.full_name || "");
-      }).catch(() => {});
-    };
-    return () => { delete window.__refreshHomeAvatar; };
-  }, []);
+  const { avatarUrl, userName } = useAvatar();
 
 
   // Voice
@@ -167,8 +148,9 @@ export default function Home() {
       {/* Header */}
       <header className="sticky top-0 z-10 bg-card border-b border-border relative">
         <div className="max-w-lg mx-auto px-4 py-3.5 text-center">
-          <h1 className="font-heading text-[21px] font-semibold tracking-[-0.5px] text-foreground uppercase">
-            MYLIFE
+          <h1 className="font-heading text-[21px] font-semibold tracking-[-0.5px] uppercase">
+            <span className="text-foreground">MY</span>{" "}
+            <span className="text-accent-foreground">LIFE</span>
           </h1>
         </div>
         {/* Avatar — top-left corner, Home screen only */}

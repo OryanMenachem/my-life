@@ -14,6 +14,7 @@ import AppLockSheet from "@/components/settings/AppLockSheet";
 import DeleteAccountSheet from "@/components/settings/DeleteAccountSheet";
 import ImportFromGallery from "@/components/settings/ImportFromGallery";
 import Avatar, { DEFAULTS } from "@/components/Avatar";
+import { useAvatar } from "@/lib/AvatarContext";
 import { Switch } from "@/components/ui/switch";
 
 const APP_VERSION = "1.0.0";
@@ -36,7 +37,7 @@ export default function Settings() {
   const [savingName, setSavingName] = useState(false);
   const [autoTagging, setAutoTagging] = useState(false);
   const [togglingAI, setTogglingAI] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState(null);
+  const { avatarUrl, setAvatarUrl, refresh: refreshAvatar } = useAvatar();
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarError, setAvatarError] = useState("");
   const fileInputRef = useRef(null);
@@ -57,7 +58,7 @@ export default function Settings() {
       setRemindersEnabled(u?.import_reminders_enabled !== false);
       setAvatarUrl(u?.avatar_url || null);
     }).catch(() => {});
-  }, []);
+  }, [setAvatarUrl]);
 
   const toggleAutoTagging = async (checked) => {
     setAutoTagging(checked);
@@ -101,7 +102,7 @@ export default function Settings() {
       await base44.auth.updateMe({ avatar_url: file_url });
       setAvatarUrl(file_url);
       setMe((prev) => ({ ...prev, avatar_url: file_url }));
-      if (window.__refreshHomeAvatar) window.__refreshHomeAvatar();
+      refreshAvatar();
     } catch {
       setAvatarError("Upload failed — please try again.");
     }
@@ -116,7 +117,7 @@ export default function Settings() {
       await base44.auth.updateMe({ avatar_url: key });
       setAvatarUrl(key);
       setMe((prev) => ({ ...prev, avatar_url: key }));
-      if (window.__refreshHomeAvatar) window.__refreshHomeAvatar();
+      refreshAvatar();
     } catch {
       setAvatarError("Couldn't save avatar — please try again.");
     }

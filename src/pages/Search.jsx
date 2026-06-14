@@ -1,7 +1,6 @@
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { useFilteredEntriesWithTags } from "@/hooks/useSearchEntries";
-import { useInfiniteEntries } from "@/hooks/useInfiniteEntries";
+import { useFilteredSearchEntries, useSearchStats } from "@/hooks/useSearchEntries";
 import { useTagCatalog } from "@/hooks/useTagCatalog";
 import { groupEntriesByDay } from "@/utils/groupEntriesByDay";
 import SearchBar from "@/components/search/SearchBar";
@@ -14,13 +13,10 @@ import SearchEmptyState from "@/components/search/SearchEmptyState";
 import InfiniteScrollSentinel from "@/components/InfiniteScrollSentinel";
 import WriteScreen from "@/components/entries/WriteScreen";
 import DeleteConfirmSheet from "@/components/entries/DeleteConfirmSheet";
+import UndoSnackbar from "@/components/entries/UndoSnackbar";
 import DayGroup from "@/components/entries/DayGroup";
 import { Loader2 } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
-import {
-  startOfDay, endOfDay, startOfWeek, endOfWeek,
-  startOfMonth, endOfMonth, startOfYear, endOfYear,
-} from "date-fns";
 
 export default function Search() {
   const [rawQuery, setRawQuery] = useState("");
@@ -32,57 +28,22 @@ export default function Search() {
   const [timeSheetOpen, setTimeSheetOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
   const [deletingEntry, setDeletingEntry] = useState(null);
+  const [undoEntry, setUndoEntry] = useState(null);
   const undoTimerRef = useRef(null);
 
   const query = useDebounce(rawQuery, 280);
+  const { categories, tags, tagById, categoryByKey } = useTagCatalog();
 
   const {
     entries,
+    allEntries,
+    filtered,
     isLoading,
     isFetchingMore,
     hasMore,
     fetchNextPage,
-    updateEntry: updateEntryInList,
-    removeEntry: removeEntryInList,
-    restoreEntry: restoreEntryInList,
-  } = useInfiniteEntries();
-  const { categories, tags, tagById, categoryByKey } = useTagCatalog();
-
-  // Compute top 3 most-used tags
-  const topTags = useMemo(() => {
-    const counts = {};
-    for (const e of entries) {
-      for (const id of (e.tag_ids || [])) {
-        counts[id] = (counts[id] || 0) + 1;
-      }
-    }
-    return Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
-      .map(([id]) => id);
-  }, [entries]);
-
-  // Entry counts per time preset (for the time filter sheet)
-  const entryCounts = useMemo(() => {
-    const now = new Date();
-    const ranges = {
-      today: [startOfDay(now), endOfDay(now)],
-      week: [startOfWeek(now, { weekStartsOn: 1 }), endOfWeek(now, { weekStartsOn: 1 })],
-      month: [startOfMonth(now), endOfMonth(now)],
-      year: [startOfYear(now), endOfYear(now)],
-    };
-    const counts = { all: entries.length };
-    for (const [key, [start, end]] of Object.entries(ranges)) {
-      counts[key] = entries.filter((e) => {
-        const d = new Date(e.entry_date || e.created_date);
-        return d >= start && d <= end;
-      }).length;
-    }
-    return counts;
-  }, [entries]);
-
-  const filtered = useFilteredEntriesWithTags({
-    entries,
+    refetch,
+  } = useFilteredSearchEntries({
     query,
     selectedTagIds,
     contentTypes,
@@ -91,15 +52,17 @@ export default function Search() {
     tagById,
   });
 
+  // Compute stats from the FULL entry set (not just the loaded page)
+  const { topTags, entryCounts } = useSearchStats({ allEntries });
+
   const groups = useMemo(() => {
-    // Sort filtered entries newest-first
-    const sorted = [...filtered].sort((a, b) => {
+    const sorted = [...entries].sort((a, b) => {
       const dateA = new Date(a.entry_date || a.created_date);
       const dateB = new Date(b.entry_date || b.created_date);
       return dateB - dateA;
     });
     return groupEntriesByDay(sorted);
-  }, [filtered]);
+  }, [entries]);
 
   const hasFilters = rawQuery.trim() || selectedTagIds.length > 0 || contentTypes.length > 0 || (timeFilter && timeFilter !== "all");
   const showResults = hasFilters;
@@ -124,32 +87,38 @@ export default function Search() {
     setCustomRange(null);
   }, []);
 
-  // ── Edit ────────────────────────────────────────────────────
+  // ── Edit ──
   const handleEditSave = (updatedEntry) => {
-    updateEntryInList(updatedEntry);
     setEditingEntry(null);
+    refetch();
   };
 
-  // ── Delete ──────────────────────────────────────────────────
+  // ── Delete ──
   const handleDeleteRequest = (entry) => setDeletingEntry(entry);
 
   const handleDeleteConfirm = () => {
     const entry = deletingEntry;
     setDeletingEntry(null);
-    removeEntryInList(entry.id);
+    setUndoEntry(entry);
     clearTimeout(undoTimerRef.current);
     undoTimerRef.current = setTimeout(async () => {
+      setUndoEntry(null);
       try {
         await base44.entities.Entry.delete(entry.id);
-      } catch {
-        restoreEntryInList(entry);
-      }
+        refetch();
+      } catch { /* ignore */ }
     }, 5000);
+  };
+
+  const handleUndo = () => {
+    clearTimeout(undoTimerRef.current);
+    setUndoEntry(null);
+    refetch();
   };
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Sticky search block — unified seamless */}
+      {/* Sticky search block */}
       <div className="sticky top-0 z-10 bg-card border-b border-border">
         <div className="max-w-lg mx-auto px-4 pt-4 pb-3 flex flex-col gap-2">
           <SearchBar
@@ -182,13 +151,12 @@ export default function Search() {
             <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
           </div>
         ) : !showResults ? (
-           /* Idle state: show a prompt */
-           <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-             <p className="font-heading text-[17px] text-muted-foreground/60 italic">
-               Search your journal…
-             </p>
-           </div>
-        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center px-6">
+            <p className="font-heading text-[17px] text-muted-foreground/60 italic">
+              Search your journal…
+            </p>
+          </div>
+        ) : entries.length === 0 ? (
           <>
             <div className="px-4">
               <ActiveFilterRow
@@ -205,26 +173,11 @@ export default function Search() {
                 onClearAll={clearAll}
               />
             </div>
-            {hasMore ? (
-              <div className="flex flex-col items-center gap-3">
-                <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-                  <p className="font-heading text-[17px] text-muted-foreground/60 italic">
-                    Searching your journal…
-                  </p>
-                </div>
-                <InfiniteScrollSentinel
-                  onIntersect={fetchNextPage}
-                  loading={isFetchingMore}
-                  hasMore={hasMore}
-                />
-              </div>
-            ) : (
-              <SearchEmptyState
-                query={rawQuery}
-                onSearchAllTime={() => { setTimeFilter("all"); setCustomRange(null); }}
-                onClearAll={clearAll}
-              />
-            )}
+            <SearchEmptyState
+              query={rawQuery}
+              onSearchAllTime={() => { setTimeFilter("all"); setCustomRange(null); }}
+              onClearAll={clearAll}
+            />
           </>
         ) : (
           <>
@@ -298,6 +251,12 @@ export default function Search() {
         <DeleteConfirmSheet
           onConfirm={handleDeleteConfirm}
           onCancel={() => setDeletingEntry(null)}
+        />
+      )}
+      {undoEntry && (
+        <UndoSnackbar
+          onUndo={handleUndo}
+          onExpire={() => setUndoEntry(null)}
         />
       )}
     </div>

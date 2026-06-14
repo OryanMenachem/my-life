@@ -26,30 +26,62 @@ export default function MediaCarousel({ media, flush = false }) {
 function SingleMedia({ item, flush }) {
   const isVideo = item.type === "video";
   const src = item.thumbnail_url || item.url;
+  const [playing, setPlaying] = useState(false);
 
   return (
     <div
       className={`relative w-full overflow-hidden bg-muted ${flush ? "" : "rounded-2xl"}`}
       style={{ aspectRatio: "4/3" }}
     >
-      {isVideo ? (
+      {/* Photo or video poster */}
+      {!playing && src && (
+        <ProgressiveImage
+          src={src}
+          placeholderSrc={item.thumbnail_url || undefined}
+          alt=""
+          priority
+          containerClassName="absolute inset-0"
+        />
+      )}
+
+      {/* Video playing state */}
+      {isVideo && playing && (
         <video
           src={item.url}
           poster={item.thumbnail_url}
           controls
           playsInline
-          preload="metadata"
+          autoPlay
           className="absolute inset-0 w-full h-full object-cover bg-black"
         />
-      ) : (
-        src && (
-          <ProgressiveImage
-            src={src}
-            alt=""
-            priority
-            containerClassName="absolute inset-0"
-          />
-        )
+      )}
+
+      {/* Video play overlay */}
+      {isVideo && !playing && (
+        <button
+          onClick={() => setPlaying(true)}
+          className="absolute inset-0 flex items-center justify-center bg-black/20"
+          aria-label="Play video"
+        >
+          <div className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center">
+            <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+          </div>
+          {item.duration_seconds > 0 && (
+            <span className="absolute bottom-2 right-2 text-[11px] font-body font-semibold text-white bg-black/50 px-1.5 py-0.5 rounded">
+              {formatDuration(item.duration_seconds)}
+            </span>
+          )}
+        </button>
+      )}
+
+      {!isVideo && src && (
+        <ProgressiveImage
+          src={src}
+          placeholderSrc={item.thumbnail_url || undefined}
+          alt=""
+          priority
+          containerClassName="absolute inset-0"
+        />
       )}
     </div>
   );
@@ -214,6 +246,7 @@ function MultiMedia({ slides, flush }) {
                 {!isPlaying && src && (
                   <ProgressiveImage
                     src={src}
+                    placeholderSrc={item.thumbnail_url || undefined}
                     alt=""
                     priority={idx === 0}
                     containerClassName="absolute inset-0"

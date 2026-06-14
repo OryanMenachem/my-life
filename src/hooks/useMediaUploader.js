@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { compressImage, getVideoDuration, captureVideoThumbnail } from "@/utils/mediaUtils";
+import { processPhotoForUpload, getVideoDuration, captureVideoThumbnail } from "@/utils/mediaUtils";
 
 const MAX_VIDEO_SECONDS = 30;
 
@@ -8,7 +8,7 @@ const MAX_VIDEO_SECONDS = 30;
  * Manages a local media list with upload lifecycle per item.
  * Each item shape:
  *  { _localId, type, url, thumbnail_url, previewUrl, width, height,
- *    duration_seconds, sort_order, status: "uploading"|"ready"|"error" }
+ *    duration_seconds, sort_order, status: "uploading"|"ready"|"error", _file }
  *
  * initialMedia: array of already-saved media objects from an existing entry.
  */
@@ -27,7 +27,6 @@ export function useMediaUploader(initialMedia = []) {
     setItems((prev) => prev.filter((it) => it._localId !== localId));
   }, []);
 
-  // Returns an error message string if the file should be rejected, else null.
   const validateFile = useCallback(async (file) => {
     const isVideo = file.type.startsWith("video/");
     if (isVideo) {
@@ -43,6 +42,39 @@ export function useMediaUploader(initialMedia = []) {
     return null;
   }, []);
 
+  const uploadFileItem = useCallback(async (localId, file, isVideo) => {
+    try {
+      let url, thumbnail_url = "", width = 0, height = 0, duration_seconds = 0;
+
+      if (isVideo) {
+        try { duration_seconds = await getVideoDuration(file); } catch { /* ok */ }
+        const thumbBlob = await captureVideoThumbnail(file);
+        if (thumbBlob) {
+          const thumbFile = new File([thumbBlob], "thumb.jpg", { type: "image/jpeg" });
+          const thumbRes = await base44.integrations.Core.UploadFile({ file: thumbFile });
+          thumbnail_url = thumbRes.file_url;
+        }
+        const res = await base44.integrations.Core.UploadFile({ file });
+        url = res.file_url;
+      } else {
+        // Photo: generate thumbnail + compressed display image
+        const { thumbnailBlob, compressed } = await processPhotoForUpload(file);
+        const [thumbRes, mainRes] = await Promise.all([
+          base44.integrations.Core.UploadFile({ file: new File([thumbnailBlob], "thumb.jpg", { type: "image/jpeg" }) }),
+          base44.integrations.Core.UploadFile({ file: new File([compressed.blob], file.name, { type: compressed.blob.type }) }),
+        ]);
+        thumbnail_url = thumbRes.file_url;
+        url = mainRes.file_url;
+        width = compressed.width;
+        height = compressed.height;
+      }
+
+      updateItem(localId, { url, thumbnail_url, width, height, duration_seconds, status: "ready" });
+    } catch {
+      updateItem(localId, { status: "error" });
+    }
+  }, [updateItem]);
+
   const addFiles = useCallback(async (files) => {
     const errors = [];
 
@@ -51,7 +83,6 @@ export function useMediaUploader(initialMedia = []) {
       const isImage = file.type.startsWith("image/");
       if (!isVideo && !isImage) continue;
 
-      // Validate first (async for video duration)
       const err = await validateFile(file);
       if (err) { errors.push(err); continue; }
 
@@ -72,61 +103,34 @@ export function useMediaUploader(initialMedia = []) {
           duration_seconds: 0,
           sort_order: prev.length,
           status: "uploading",
+          _file: file, // keep reference for retry
         },
       ]);
 
       // Upload in background
-      (async () => {
-        try {
-          let uploadFile = file;
-          let width = 0, height = 0, duration_seconds = 0, thumbnail_url = "";
-
-          if (isImage) {
-            const compressed = await compressImage(file);
-            uploadFile = new File([compressed.blob], file.name, { type: "image/jpeg" });
-            width = compressed.width;
-            height = compressed.height;
-          }
-
-          if (isVideo) {
-            try { duration_seconds = await getVideoDuration(file); } catch { /* ok */ }
-            const thumbBlob = await captureVideoThumbnail(file);
-            if (thumbBlob) {
-              const thumbFile = new File([thumbBlob], "thumb.jpg", { type: "image/jpeg" });
-              const thumbRes = await base44.integrations.Core.UploadFile({ file: thumbFile });
-              thumbnail_url = thumbRes.file_url;
-            }
-          }
-
-          const res = await base44.integrations.Core.UploadFile({ file: uploadFile });
-
-          updateItem(localId, {
-            url: res.file_url,
-            thumbnail_url: thumbnail_url || "",
-            width,
-            height,
-            duration_seconds,
-            status: "ready",
-          });
-        } catch {
-          updateItem(localId, { status: "error" });
-        }
-      })();
+      uploadFileItem(localId, file, isVideo);
     }
 
     return errors;
-  }, [updateItem, validateFile]);
+  }, [updateItem, validateFile, uploadFileItem]);
 
   const retryItem = useCallback(async (localId) => {
-    // For now just mark as error so user knows — full retry would need the original file
-    // which we don't hold in memory. Removing is the graceful path.
-    updateItem(localId, { status: "error" });
-  }, [updateItem]);
+    const item = items.find((it) => it._localId === localId);
+    const file = item?._file;
+    if (!file) {
+      // No file reference — can't retry, remove instead
+      removeItem(localId);
+      return;
+    }
+    const isVideo = file.type.startsWith("video/");
+    updateItem(localId, { status: "uploading" });
+    uploadFileItem(localId, file, isVideo);
+  }, [items, updateItem, uploadFileItem, removeItem]);
 
   // Returns the media array ready to persist (only "ready" items, without local fields)
   const readyMedia = items
     .filter((it) => it.status === "ready")
-    .map(({ _localId, previewUrl, status, ...rest }, idx) => ({
+    .map(({ _localId, previewUrl, status, _file, ...rest }, idx) => ({
       ...rest,
       sort_order: idx,
     }));

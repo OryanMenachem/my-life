@@ -6,6 +6,7 @@
       "type": "string",
       "minLength": 0,
       "maxLength": 5000,
+      "default": "",
       "description": "The entry text"
     },
     "source": {
@@ -98,9 +99,7 @@
       }
     }
   },
-  "required": [
-    "content"
-  ],
+  "required": [],
   "rls": {
     "create": true,
     "read": {

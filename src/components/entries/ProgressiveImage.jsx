@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from "react";
  */
 export default function ProgressiveImage({
   src,
+  placeholderSrc,
   alt = "",
   className = "",
   containerClassName = "",
@@ -14,6 +15,7 @@ export default function ProgressiveImage({
   aspectRatio,
   onLoad: onLoadProp,
 }) {
+  const blurSrc = placeholderSrc || src;
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const sharpRef = useRef(null);
@@ -54,13 +56,13 @@ export default function ProgressiveImage({
       className={`${needsRelative ? "relative" : ""} overflow-hidden bg-muted ${containerClassName}`}
       style={aspectRatio ? { aspectRatio } : undefined}
     >
-      {/* Blurred placeholder — fades out when sharp image is ready */}
+      {/* Blurred placeholder — tiny thumbnail, fades out when sharp image is ready */}
       <img
-        src={src}
+        src={blurSrc}
         alt=""
         aria-hidden="true"
         decoding="async"
-        className={`absolute inset-0 w-full h-full object-cover blur-xl scale-110 transition-opacity duration-[300ms] ease-in-out ${
+        className={`absolute inset-0 w-full h-full object-cover blur-lg scale-110 transition-opacity duration-[300ms] ease-in-out ${
           loaded ? "opacity-0" : "opacity-100"
         }`}
       />
