@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { formatDuration } from "@/utils/mediaUtils";
+import ProgressiveImage from "./ProgressiveImage";
 
 /**
  * Swipeable media carousel with CSS scroll-snap.
@@ -43,12 +44,12 @@ function SingleMedia({ item, flush }) {
         />
       ) : (
         src && (
-          <img
+          <ProgressiveImage
             src={src}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover bg-muted"
-            loading="lazy"
-            style={{ aspectRatio: "4/3" }}
+            priority
+            containerClassName="absolute inset-0"
+            className="!absolute inset-0"
           />
         )
       )}
@@ -186,11 +187,12 @@ function MultiMedia({ slides, flush }) {
               >
                 {/* Photo or video poster */}
                 {!isPlaying && src && (
-                  <img
+                  <ProgressiveImage
                     src={src}
                     alt=""
-                    className="absolute inset-0 w-full h-full object-cover"
-                    loading={idx === 0 ? "eager" : "lazy"}
+                    priority={idx === 0}
+                    containerClassName="absolute inset-0"
+                    className="!absolute inset-0"
                   />
                 )}
 

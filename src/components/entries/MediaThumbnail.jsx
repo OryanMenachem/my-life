@@ -15,7 +15,7 @@ export default function MediaThumbnail({ item, onRemove, onRetry }) {
   return (
     <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-muted border border-border/50">
       {src ? (
-        <img src={src} alt="" className="w-full h-full object-cover" />
+        <img src={src} alt="" className="w-full h-full object-cover" decoding="async" loading="lazy" />
       ) : (
         <div className="w-full h-full bg-muted" />
       )}

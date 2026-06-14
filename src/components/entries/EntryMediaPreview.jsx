@@ -1,5 +1,6 @@
 import { Play } from "lucide-react";
 import { formatDuration } from "@/utils/mediaUtils";
+import ProgressiveImage from "./ProgressiveImage";
 
 /**
  * Shows the first media item on a feed card at 4:3 ratio.
@@ -19,11 +20,11 @@ export default function EntryMediaPreview({ media, flush = false }) {
       style={{ aspectRatio: "4/3" }}
     >
       {src && (
-        <img
+        <ProgressiveImage
           src={src}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-          loading="lazy"
+          containerClassName="absolute inset-0"
+          className="!absolute inset-0"
         />
       )}
 

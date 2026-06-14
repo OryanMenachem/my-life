@@ -18,7 +18,7 @@ export default function LinkCard({ item, onRemove, compact = false }) {
       {/* Thumbnail */}
       <div className="w-9 h-9 rounded-lg bg-muted flex-shrink-0 flex items-center justify-center overflow-hidden">
         {hasThumbnail ? (
-          <img src={item.thumbnail_url} alt="" className="w-full h-full object-cover" />
+          <img src={item.thumbnail_url} alt="" className="w-full h-full object-cover" decoding="async" loading="lazy" />
         ) : (
           <LinkIcon className="w-4 h-4 text-muted-foreground" />
         )}
