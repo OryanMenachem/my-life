@@ -389,12 +389,12 @@ export default function WriteScreen({ onSave, onCancel, onDelete, entry = null, 
       {/* Bottom bar — edit mode only: hint + delete */}
       {isEdit && (
         <div className="flex items-center px-5 pt-3 pb-3 border-t border-border/40 flex-shrink-0">
-          <span className="text-[11px] font-body" style={{ color: "#8c867c" }}>Tap a photo to remove it</span>
+          <span className="text-[11px] font-body text-muted-foreground">Tap a photo to remove it</span>
           {onDelete && (
             <button
               onClick={onDelete}
               className="ml-auto w-10 h-10 flex items-center justify-center transition-colors"
-              style={{ borderRadius: "11px", background: "#f7eceb", color: "#b1493f" }}
+              className="rounded-[11px] bg-destructive/10 text-destructive"
               aria-label="Delete entry"
             >
               <Trash2 className="w-[17px] h-[17px]" />

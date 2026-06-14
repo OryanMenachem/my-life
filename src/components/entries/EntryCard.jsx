@@ -70,7 +70,6 @@ export default function EntryCard({ entry, onEdit, onDelete, tagById, categoryBy
   }, []);
 
   const textStyle = {
-    color: "#2c2823",
     direction: entry.content && isRTL(entry.content) ? "rtl" : "ltr",
     textAlign: entry.content && isRTL(entry.content) ? "right" : "left",
     fontWeight: 400,
@@ -78,7 +77,7 @@ export default function EntryCard({ entry, onEdit, onDelete, tagById, categoryBy
   };
 
   return (
-    <div className="w-full relative" style={{ backgroundColor: "#FFFFFF" }}>
+    <div className="w-full relative bg-card">
       {/* ── Full-width visual media at top (flush, no padding) ── */}
       {hasVisual && (
         <MediaCarousel media={visualMedia} flush />
@@ -96,7 +95,7 @@ export default function EntryCard({ entry, onEdit, onDelete, tagById, categoryBy
       {/* ── Meta row + kebab menu ── */}
       <div className={`flex items-center gap-[6px] px-4 ${hasMedia && !hasLinks ? "pt-4" : hasLinks && !hasVisual ? "pt-2" : hasMedia ? "pt-4" : "pt-5"}`}>
         <span className="w-[6px] h-[6px] rounded-full flex-shrink-0" style={{ backgroundColor: "#c79a4f" }} />
-        <span className="text-[10.5px] font-body font-semibold tabular-nums" style={{ color: "#8c867c" }}>
+        <span className="text-[10.5px] font-body font-semibold tabular-nums text-muted-foreground">
           {timeStr}
         </span>
         {/* Kebab menu pushed to the right */}
@@ -115,7 +114,7 @@ export default function EntryCard({ entry, onEdit, onDelete, tagById, categoryBy
             >
               <p
                 ref={textRef}
-                className={`font-body text-[15px] leading-[1.8] pt-[8px] ${!textExpanded ? "line-clamp-3" : ""}`}
+                className={`font-body text-[15px] leading-[1.8] pt-[8px] text-foreground ${!textExpanded ? "line-clamp-3" : ""}`}
                 style={textStyle}
               >
                 {searchQuery ? highlightText(entry.content, searchQuery) : entry.content}
@@ -154,8 +153,7 @@ export default function EntryCard({ entry, onEdit, onDelete, tagById, categoryBy
             {overflow > 0 && !tagsExpanded && (
               <button
                 onClick={() => setTagsExpanded(true)}
-                className="text-[10px] font-body font-semibold transition-colors"
-                style={{ color: "#8c867c" }}
+                className="text-[10px] font-body font-semibold text-muted-foreground transition-colors"
               >
                 +{overflow}
               </button>
@@ -163,8 +161,7 @@ export default function EntryCard({ entry, onEdit, onDelete, tagById, categoryBy
             {tagsExpanded && overflow > 0 && (
               <button
                 onClick={() => setTagsExpanded(false)}
-                className="text-[10px] font-body font-semibold transition-colors"
-                style={{ color: "#8c867c" }}
+                className="text-[10px] font-body font-semibold text-muted-foreground transition-colors"
               >
                 less
               </button>

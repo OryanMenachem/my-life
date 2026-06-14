@@ -25,10 +25,10 @@ export default function Tags() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border/40">
-        <div className="max-w-lg mx-auto px-5 py-4">
-          <h1 className="text-2xl font-heading font-semibold tracking-tight text-foreground">
-            Tags
+      <header className="sticky top-0 z-10 bg-card border-b border-border">
+        <div className="max-w-lg mx-auto px-4 py-3 text-center">
+          <h1 className="font-heading text-[21px] font-semibold tracking-[-0.5px] text-foreground uppercase">
+            TAGS
           </h1>
         </div>
       </header>

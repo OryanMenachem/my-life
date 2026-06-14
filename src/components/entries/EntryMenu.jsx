@@ -43,15 +43,14 @@ export default function EntryMenu({ onEdit, onDelete }) {
       {open && (
         <div
           className="fixed inset-0 z-20"
-          style={{ background: "rgba(20,18,16,0.08)" }}
+          className="bg-black/5"
           onMouseDown={() => setOpen(false)}
         />
       )}
       <div ref={menuRef} className="relative flex-shrink-0 z-30">
         <button
           onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
-          className="w-[22px] h-[22px] flex items-center justify-center"
-          style={{ color: "#8c867c" }}
+          className="w-[22px] h-[22px] flex items-center justify-center text-muted-foreground"
           aria-label="Entry options"
         >
           <KebabIcon />
@@ -60,30 +59,22 @@ export default function EntryMenu({ onEdit, onDelete }) {
         {open && (
           <div
             className="absolute right-0 z-30 overflow-hidden"
-            style={{
-              top: "28px",
-              width: "150px",
-              background: "#fff",
-              borderRadius: "14px",
-              boxShadow: "0 12px 34px rgba(0,0,0,0.18)",
-              border: "1px solid #efeeeb",
-            }}
+            className="bg-card rounded-[14px] shadow-2xl border border-border"
+            style={{ top: "28px", width: "150px" }}
           >
             <button
               onClick={(e) => { e.stopPropagation(); setOpen(false); onEdit(); }}
-              className="w-full text-left flex items-center gap-[10px] px-[14px] py-3 text-[13px] font-body font-medium transition-colors hover:bg-muted"
-              style={{ color: "#211f1b" }}
+              className="w-full text-left flex items-center gap-[10px] px-[14px] py-3 text-[13px] font-body font-medium text-foreground transition-colors hover:bg-muted"
             >
-              <span style={{ color: "#6e685f" }}><EditIcon /></span>
+              <span className="text-muted-foreground"><EditIcon /></span>
               Edit
             </button>
-            <div className="h-px" style={{ background: "#efeeeb" }} />
+            <div className="h-px bg-border" />
             <button
               onClick={(e) => { e.stopPropagation(); setOpen(false); onDelete(); }}
-              className="w-full text-left flex items-center gap-[10px] px-[14px] py-3 text-[13px] font-body font-medium transition-colors hover:bg-red-50"
-              style={{ color: "#b1493f" }}
+              className="w-full text-left flex items-center gap-[10px] px-[14px] py-3 text-[13px] font-body font-medium text-destructive transition-colors hover:bg-destructive/10"
             >
-              <span style={{ color: "#b1493f" }}><TrashIcon /></span>
+              <span className="text-destructive"><TrashIcon /></span>
               Delete
             </button>
           </div>

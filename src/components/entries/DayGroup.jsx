@@ -8,10 +8,10 @@ export default function DayGroup({ label, entries, onEditEntry, onDeleteEntry, t
         {(() => {
           const parts = label.split(" · ");
           return (
-            <span className="font-heading text-[14px] font-semibold" style={{ color: "#211f1b" }}>
+            <span className="font-heading text-[14px] font-semibold text-foreground">
               {parts[0]}
               {parts[1] && (
-                <span className="font-normal text-[10px] ml-[6px]" style={{ color: "#8c867c" }}>
+                <span className="font-normal text-[10px] ml-[6px] text-muted-foreground">
                   · {parts[1]}
                 </span>
               )}
@@ -23,7 +23,7 @@ export default function DayGroup({ label, entries, onEditEntry, onDeleteEntry, t
       {/* Cards flush white block, hairline separators */}
       <div className="flex flex-col gap-[10px]">
         {entries.map((entry) => (
-          <div key={entry.id} style={{ backgroundColor: "#FFFFFF" }}>
+          <div key={entry.id} className="bg-card">
             <EntryCard
               entry={entry}
               onEdit={() => onEditEntry(entry)}

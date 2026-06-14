@@ -88,27 +88,27 @@ export default function AutoTagButton({ text, tags, categoryByKey, selectedIds, 
 
         {/* Status message */}
         {status === "idle" && !hint && (
-          <span className="text-[11px] font-body" style={{ color: "#8c867c" }}>
+          <span className="text-[11px] font-body text-muted-foreground">
             Send this to AI for auto-tagging
           </span>
         )}
         {hint && (
-          <span className="text-[11px] font-body" style={{ color: "#b1493f" }}>
+          <span className="text-[11px] font-body text-destructive">
             {hint}
           </span>
         )}
         {status === "empty" && (
-          <span className="text-[11px] font-body" style={{ color: "#8c867c" }}>
+          <span className="text-[11px] font-body text-muted-foreground">
             No matching tags found
           </span>
         )}
         {status === "error" && (
-          <span className="text-[11px] font-body" style={{ color: "#b1493f" }}>
+          <span className="text-[11px] font-body text-destructive">
             Couldn't reach AI, try again
           </span>
         )}
         {status === "done" && aiTagIds.length > 0 && (
-          <span className="text-[11px] font-body font-semibold" style={{ color: "#946a2b" }}>
+          <span className="text-[11px] font-body font-semibold text-primary">
             ✦ AI suggested {aiTagIds.length} tag{aiTagIds.length > 1 ? "s" : ""}
           </span>
         )}

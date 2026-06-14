@@ -20,34 +20,33 @@ export default function Composer({ onOpen }) {
   return (
     <button
       onClick={onOpen}
-      className="w-full text-left px-4 pt-4 pb-4 flex flex-col"
-      style={{ minHeight: "200px", backgroundColor: "#FFFFFF", borderBottom: "1px solid #E5E5E5" }}
+      className="w-full text-left px-4 pt-4 pb-4 flex flex-col bg-card border-b border-border"
+      style={{ minHeight: "200px" }}
       aria-label="Write a new entry"
     >
       {/* Time row */}
       <div className="flex items-center gap-2 mb-4">
-        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: "#D0D0D0" }} />
-        <span className="text-xs font-body font-semibold tabular-nums" style={{ color: "#808080" }}>
+        <span className="w-2 h-2 rounded-full flex-shrink-0 bg-muted-foreground/30" />
+        <span className="text-xs font-body font-semibold tabular-nums text-muted-foreground">
           {time}
         </span>
-        <span className="text-[10px] font-body font-semibold uppercase tracking-widest" style={{ color: "#A8A8A8" }}>
+        <span className="text-[10px] font-body font-semibold uppercase tracking-widest text-muted-foreground/50">
           now
         </span>
       </div>
 
       {/* Placeholder */}
-      <p className="font-heading italic text-[19px] leading-snug flex-1" style={{ color: "#BFBFBF" }}>
+      <p className="font-heading italic text-[19px] leading-snug flex-1 text-muted-foreground/40">
         What's on your mind right now?
       </p>
 
       {/* Bottom row: straight pin + round pencil button */}
       <div className="flex items-center justify-between mt-3">
-        <span style={{ color: "#A8A8A8" }}>
+        <span className="text-muted-foreground/40">
           <PinIcon />
         </span>
         <span
-          className="w-[34px] h-[34px] rounded-full flex items-center justify-center flex-shrink-0"
-          style={{ backgroundColor: "#F6F6F6" }}
+          className="w-[34px] h-[34px] rounded-full flex items-center justify-center flex-shrink-0 bg-secondary"
         >
           <PencilIcon />
         </span>

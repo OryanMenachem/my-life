@@ -92,7 +92,7 @@ export default function TagPickerSheet({ categories, tags, selectedIds, onClose 
 
   return (
     // Backdrop
-    <div className="fixed inset-0 z-[60] flex flex-col justify-end" onClick={handleDone}>
+    <div className="fixed inset-0 z-[60] flex flex-col justify-end bg-black/30" onClick={handleDone}>
       {/* Sheet */}
       <div
         className="bg-background rounded-t-2xl shadow-2xl max-h-[80vh] flex flex-col"

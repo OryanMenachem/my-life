@@ -184,6 +184,7 @@ export default function Calendar() {
           entry={editingEntry}
           onSave={handleEditSave}
           onCancel={() => setEditingEntry(null)}
+          onDelete={() => { setEditingEntry(null); setDeletingEntry(editingEntry); }}
         />
       )}
 
