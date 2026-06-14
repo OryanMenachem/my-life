@@ -2,11 +2,12 @@ import { useMemo, useCallback } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 10;
 const QUERY_KEY = ["entries-feed"];
 
 /**
  * Cursor-based infinite pagination for entries using react-query.
+ * Sorted by entry_date (newest first), matching the display grouping.
  * Cached across navigation — switching tabs doesn't re-fetch.
  */
 export function useInfiniteEntries() {
@@ -23,16 +24,16 @@ export function useInfiniteEntries() {
     queryFn: async ({ pageParam }) => {
       if (pageParam) {
         return base44.entities.Entry.filter(
-          { created_date: { $lt: pageParam } },
-          "-created_date",
+          { entry_date: { $lt: pageParam } },
+          "-entry_date",
           PAGE_SIZE
         );
       }
-      return base44.entities.Entry.filter({}, "-created_date", PAGE_SIZE);
+      return base44.entities.Entry.filter({}, "-entry_date", PAGE_SIZE);
     },
     getNextPageParam: (lastPage) =>
       lastPage.length === PAGE_SIZE
-        ? lastPage[lastPage.length - 1].created_date
+        ? lastPage[lastPage.length - 1].entry_date
         : undefined,
     initialPageParam: null,
   });
@@ -77,14 +78,18 @@ export function useInfiniteEntries() {
       if (!old) return { pages: [[entry]], pageParams: [null] };
       const all = old.pages.flat();
       const sorted = [entry, ...all].sort(
-        (a, b) => new Date(b.created_date).getTime() - new Date(a.created_date).getTime()
+        (a, b) =>
+          new Date(b.entry_date || b.created_date).getTime() -
+          new Date(a.entry_date || a.created_date).getTime()
       );
       const pages = [];
       for (let i = 0; i < sorted.length; i += PAGE_SIZE) {
         pages.push(sorted.slice(i, i + PAGE_SIZE));
       }
       const pageParams = pages.map((_, i) =>
-        i === 0 ? null : pages[i - 1]?.[PAGE_SIZE - 1]?.created_date
+        i === 0
+          ? null
+          : pages[i - 1]?.[PAGE_SIZE - 1]?.entry_date || pages[i - 1]?.[PAGE_SIZE - 1]?.created_date
       );
       return { pages, pageParams };
     });
