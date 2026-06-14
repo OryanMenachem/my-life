@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import { getEntryDate } from "@/utils/groupEntriesByDay";
 import { highlightText } from "@/utils/searchHighlight";
@@ -19,6 +20,12 @@ const MAX_VISIBLE_TAGS = 3;
 const isRTL = (text) => /[\u0590-\u05FF\uFB1D-\uFB4F]/.test(text?.slice(0, 60));
 
 export default function SearchResultCard({ entry, query, onClick, tagById, categoryByKey }) {
+  const [textExpanded, setTextExpanded] = useState(false);
+  const [needsTruncation, setNeedsTruncation] = useState(false);
+  const [wrapperMaxH, setWrapperMaxH] = useState(undefined);
+  const textRef = useRef(null);
+  const clampedHRef = useRef(0);
+
   const date = getEntryDate(entry);
   const timeStr = format(date, "HH:mm");
 
@@ -27,6 +34,41 @@ export default function SearchResultCard({ entry, query, onClick, tagById, categ
   const overflow = tagIds.length - MAX_VISIBLE_TAGS;
 
   const hasMedia = entry.media && entry.media.length > 0;
+
+  // Measure heights and detect overflow
+  useEffect(() => {
+    const el = textRef.current;
+    if (!el || !entry.content) {
+      setNeedsTruncation(false);
+      return;
+    }
+    const full = el.scrollHeight;
+    const clamped = el.clientHeight;
+    const overflows = full > clamped + 1;
+    setNeedsTruncation(overflows);
+    if (overflows && !textExpanded) {
+      clampedHRef.current = clamped;
+      setWrapperMaxH(clamped);
+    }
+  }, [entry.content, textExpanded]);
+
+  const handleExpand = useCallback((e) => {
+    e.stopPropagation();
+    const el = textRef.current;
+    if (el) {
+      el.classList.remove("line-clamp-3");
+      const full = el.scrollHeight;
+      el.classList.add("line-clamp-3");
+      setWrapperMaxH(full);
+    }
+    setTextExpanded(true);
+  }, []);
+
+  const handleCollapse = useCallback((e) => {
+    e.stopPropagation();
+    setTextExpanded(false);
+    setWrapperMaxH(clampedHRef.current);
+  }, []);
 
   return (
     <button
@@ -47,19 +89,45 @@ export default function SearchResultCard({ entry, query, onClick, tagById, categ
         </span>
       </div>
 
-      {/* ── Content with highlights — grows ── */}
+      {/* ── Content with highlights — truncatable ── */}
       {entry.content ? (
-        <p
-          className="font-body text-[14.5px] leading-[1.75] px-5 py-[6px] flex-1"
-          style={{
-            color: "#2c2823",
-            direction: isRTL(entry.content) ? "rtl" : "ltr",
-            textAlign: isRTL(entry.content) ? "right" : "left",
-            fontWeight: 400,
-          }}
-        >
-          {highlightText(entry.content, query)}
-        </p>
+        <div className="px-5">
+          <div
+            className="overflow-hidden transition-[max-height] duration-300 ease-in-out"
+            style={{ maxHeight: wrapperMaxH !== undefined ? `${wrapperMaxH}px` : undefined }}
+          >
+            <p
+              ref={textRef}
+              className={`font-body text-[14.5px] leading-[1.75] py-[6px] ${!textExpanded ? "line-clamp-3" : ""}`}
+              style={{
+                color: "#2c2823",
+                direction: isRTL(entry.content) ? "rtl" : "ltr",
+                textAlign: isRTL(entry.content) ? "right" : "left",
+                fontWeight: 400,
+              }}
+            >
+              {highlightText(entry.content, query)}
+            </p>
+          </div>
+          {needsTruncation && !textExpanded && (
+            <button
+              onClick={handleExpand}
+              className="text-[11.5px] font-body font-medium transition-colors"
+              style={{ color: "#8c867c" }}
+            >
+              …more
+            </button>
+          )}
+          {textExpanded && (
+            <button
+              onClick={handleCollapse}
+              className="text-[11.5px] font-body font-medium transition-colors"
+              style={{ color: "#8c867c" }}
+            >
+              less
+            </button>
+          )}
+        </div>
       ) : null}
 
       {/* ── Tags ── */}

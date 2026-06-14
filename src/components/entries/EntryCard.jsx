@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import { getEntryDate } from "@/utils/groupEntriesByDay";
 import MiniTagChip from "@/components/tags/MiniTagChip";
@@ -8,7 +8,6 @@ import LinkCard from "./LinkCard";
 import { highlightText } from "@/utils/searchHighlight";
 
 const MAX_VISIBLE_TAGS = 3;
-const TEXT_LINE_LIMIT = 3; // lines before truncation
 
 // Detect if text is primarily Hebrew/RTL
 const isRTL = (text) => /[\u0590-\u05FF\uFB1D-\uFB4F]/.test(text?.slice(0, 60));
@@ -17,7 +16,9 @@ export default function EntryCard({ entry, onEdit, onDelete, tagById, categoryBy
   const [textExpanded, setTextExpanded] = useState(false);
   const [tagsExpanded, setTagsExpanded] = useState(false);
   const [needsTruncation, setNeedsTruncation] = useState(false);
+  const [wrapperMaxH, setWrapperMaxH] = useState(undefined);
   const textRef = useRef(null);
+  const clampedHRef = useRef(0);
 
   const date = getEntryDate(entry);
   const timeStr = format(date, "HH:mm");
@@ -33,17 +34,40 @@ export default function EntryCard({ entry, onEdit, onDelete, tagById, categoryBy
   const hasVisual = visualMedia.length > 0;
   const hasLinks = linkMedia.length > 0;
 
-  // Detect if text overflows the clamped lines
+  // Measure heights and detect overflow
   useEffect(() => {
-    if (!entry.content || textExpanded) {
+    const el = textRef.current;
+    if (!el || !entry.content) {
       setNeedsTruncation(false);
       return;
     }
-    const el = textRef.current;
-    if (el) {
-      setNeedsTruncation(el.scrollHeight > el.clientHeight);
+    // scrollHeight = full content height, clientHeight = visible (clamped) height
+    const full = el.scrollHeight;
+    const clamped = el.clientHeight;
+    const overflows = full > clamped + 1;
+    setNeedsTruncation(overflows);
+    if (overflows && !textExpanded) {
+      clampedHRef.current = clamped;
+      setWrapperMaxH(clamped);
     }
   }, [entry.content, textExpanded]);
+
+  const handleExpand = useCallback(() => {
+    const el = textRef.current;
+    if (el) {
+      // Temporarily remove line-clamp to measure full natural height
+      el.classList.remove("line-clamp-3");
+      const full = el.scrollHeight;
+      el.classList.add("line-clamp-3");
+      setWrapperMaxH(full);
+    }
+    setTextExpanded(true);
+  }, []);
+
+  const handleCollapse = useCallback(() => {
+    setTextExpanded(false);
+    setWrapperMaxH(clampedHRef.current);
+  }, []);
 
   const textStyle = {
     color: "#2c2823",
@@ -85,16 +109,21 @@ export default function EntryCard({ entry, onEdit, onDelete, tagById, categoryBy
       <div className="px-4 pb-[16px]">
         {entry.content ? (
           <div>
-            <p
-              ref={textRef}
-              className={`font-body text-[15px] leading-[1.8] pt-[8px] ${!textExpanded ? `line-clamp-${TEXT_LINE_LIMIT}` : ""}`}
-              style={textStyle}
+            <div
+              className="overflow-hidden transition-[max-height] duration-300 ease-in-out"
+              style={{ maxHeight: wrapperMaxH !== undefined ? `${wrapperMaxH}px` : undefined }}
             >
-              {searchQuery ? highlightText(entry.content, searchQuery) : entry.content}
-            </p>
+              <p
+                ref={textRef}
+                className={`font-body text-[15px] leading-[1.8] pt-[8px] ${!textExpanded ? "line-clamp-3" : ""}`}
+                style={textStyle}
+              >
+                {searchQuery ? highlightText(entry.content, searchQuery) : entry.content}
+              </p>
+            </div>
             {needsTruncation && !textExpanded && (
               <button
-                onClick={() => setTextExpanded(true)}
+                onClick={handleExpand}
                 className="text-[11.5px] font-body font-medium mt-[2px] transition-colors"
                 style={{ color: "#8c867c" }}
               >
@@ -103,7 +132,7 @@ export default function EntryCard({ entry, onEdit, onDelete, tagById, categoryBy
             )}
             {textExpanded && (
               <button
-                onClick={() => setTextExpanded(false)}
+                onClick={handleCollapse}
                 className="text-[11.5px] font-body font-medium mt-[2px] transition-colors"
                 style={{ color: "#8c867c" }}
               >
