@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQueryClient } from "@tanstack/react-query";
-import { useAllEntries, useFilteredEntriesWithTags } from "@/hooks/useSearchEntries";
+import { useFilteredEntriesWithTags } from "@/hooks/useSearchEntries";
+import { useInfiniteEntries } from "@/hooks/useInfiniteEntries";
 import { useTagCatalog } from "@/hooks/useTagCatalog";
 import { groupEntriesByDay } from "@/utils/groupEntriesByDay";
 import SearchBar from "@/components/search/SearchBar";
@@ -11,6 +11,7 @@ import ContentTypeFilter from "@/components/search/ContentTypeFilter";
 import AllTagsSheet from "@/components/search/AllTagsSheet";
 import TimeFilterSheet from "@/components/search/TimeFilterSheet";
 import SearchEmptyState from "@/components/search/SearchEmptyState";
+import InfiniteScrollSentinel from "@/components/InfiniteScrollSentinel";
 import WriteScreen from "@/components/entries/WriteScreen";
 import DeleteConfirmSheet from "@/components/entries/DeleteConfirmSheet";
 import DayGroup from "@/components/entries/DayGroup";
@@ -33,11 +34,18 @@ export default function Search() {
   const [deletingEntry, setDeletingEntry] = useState(null);
   const undoTimerRef = useRef(null);
 
-  const queryClient = useQueryClient();
-
   const query = useDebounce(rawQuery, 280);
 
-  const { data: entries = [], isLoading } = useAllEntries();
+  const {
+    entries,
+    isLoading,
+    isFetchingMore,
+    hasMore,
+    fetchNextPage,
+    updateEntry: updateEntryInList,
+    removeEntry: removeEntryInList,
+    restoreEntry: restoreEntryInList,
+  } = useInfiniteEntries();
   const { categories, tags, tagById, categoryByKey } = useTagCatalog();
 
   // Compute top 3 most-used tags
@@ -118,7 +126,7 @@ export default function Search() {
 
   // ── Edit ────────────────────────────────────────────────────
   const handleEditSave = (updatedEntry) => {
-    queryClient.invalidateQueries({ queryKey: ["entries"] });
+    updateEntryInList(updatedEntry);
     setEditingEntry(null);
   };
 
@@ -128,16 +136,15 @@ export default function Search() {
   const handleDeleteConfirm = () => {
     const entry = deletingEntry;
     setDeletingEntry(null);
+    removeEntryInList(entry.id);
     clearTimeout(undoTimerRef.current);
     undoTimerRef.current = setTimeout(async () => {
       try {
         await base44.entities.Entry.delete(entry.id);
-        queryClient.invalidateQueries({ queryKey: ["entries"] });
       } catch {
-        queryClient.invalidateQueries({ queryKey: ["entries"] });
+        restoreEntryInList(entry);
       }
     }, 5000);
-    queryClient.invalidateQueries({ queryKey: ["entries"] });
   };
 
   return (
@@ -198,11 +205,26 @@ export default function Search() {
                 onClearAll={clearAll}
               />
             </div>
-            <SearchEmptyState
-              query={rawQuery}
-              onSearchAllTime={() => { setTimeFilter("all"); setCustomRange(null); }}
-              onClearAll={clearAll}
-            />
+            {hasMore ? (
+              <div className="flex flex-col items-center gap-3">
+                <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+                  <p className="font-heading text-[17px] text-muted-foreground/60 italic">
+                    Searching your journal…
+                  </p>
+                </div>
+                <InfiniteScrollSentinel
+                  onIntersect={fetchNextPage}
+                  loading={isFetchingMore}
+                  hasMore={hasMore}
+                />
+              </div>
+            ) : (
+              <SearchEmptyState
+                query={rawQuery}
+                onSearchAllTime={() => { setTimeFilter("all"); setCustomRange(null); }}
+                onClearAll={clearAll}
+              />
+            )}
           </>
         ) : (
           <>
@@ -234,6 +256,11 @@ export default function Search() {
                   searchQuery={rawQuery}
                 />
               ))}
+              <InfiniteScrollSentinel
+                onIntersect={fetchNextPage}
+                loading={isFetchingMore}
+                hasMore={hasMore}
+              />
             </div>
           </>
         )}

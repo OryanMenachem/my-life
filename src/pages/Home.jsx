@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { groupEntriesByDay } from "@/utils/groupEntriesByDay";
+import { useInfiniteEntries } from "@/hooks/useInfiniteEntries";
 import DayGroup from "../components/entries/DayGroup";
 import EmptyState from "../components/entries/EmptyState";
 import Composer from "../components/entries/Composer";
@@ -13,6 +13,7 @@ import VoiceMicButton from "../components/voice/VoiceMicButton";
 import VoiceRecordingOverlay from "../components/voice/VoiceRecordingOverlay";
 import VoicePermissionSheet from "../components/voice/VoicePermissionSheet";
 import ImportReminderBanner from "../components/ImportReminderBanner";
+import InfiniteScrollSentinel from "../components/InfiniteScrollSentinel";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useTagCatalog } from "@/hooks/useTagCatalog";
 import Avatar from "../components/Avatar";
@@ -59,46 +60,18 @@ export default function Home() {
   const [transcribing, setTranscribing] = useState(false);
   const [voiceText, setVoiceText] = useState(null); // text to open WriteScreen with
 
-  const PAGE_SIZE = 25;
-
-  const [loadedCount, setLoadedCount] = useState(PAGE_SIZE);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-
-  const queryClient = useQueryClient();
+  const {
+    entries,
+    isLoading,
+    isFetchingMore,
+    hasMore,
+    fetchNextPage,
+    prependEntry,
+    updateEntry,
+    removeEntry,
+    restoreEntry,
+  } = useInfiniteEntries();
   const { tagById, categoryByKey } = useTagCatalog();
-
-  const { data: initialEntries = [], isLoading } = useQuery({
-    queryKey: ["entries"],
-    queryFn: () => base44.entities.Entry.list("-created_date", PAGE_SIZE),
-  });
-
-  // Merge initial + lazy-loaded entries
-  const entries = initialEntries;
-
-  // When initial entries count equals page size, there may be more
-  useEffect(() => {
-    if (!isLoading && initialEntries.length < PAGE_SIZE) {
-      setHasMore(false);
-    }
-  }, [isLoading, initialEntries.length]);
-
-  const handleLoadMore = async () => {
-    if (loadingMore || !hasMore) return;
-    setLoadingMore(true);
-    try {
-      const current = queryClient.getQueryData(["entries"]) || [];
-      const nextCount = Math.max(current.length + PAGE_SIZE, PAGE_SIZE);
-      const more = await base44.entities.Entry.list("-created_date", nextCount);
-      queryClient.setQueryData(["entries"], more);
-      setLoadedCount(more.length);
-      if (more.length <= current.length) setHasMore(false);
-    } catch {
-      // Keep existing data
-    } finally {
-      setLoadingMore(false);
-    }
-  };
 
   const groups = groupEntriesByDay(entries);
 
@@ -149,17 +122,14 @@ export default function Home() {
 
   // ── Create ──────────────────────────────────────────────────
   const handleCreate = (newEntry) => {
-    queryClient.setQueryData(["entries"], (old = []) => [newEntry, ...old]);
-    setLoadedCount((c) => c + 1);
+    prependEntry(newEntry);
     setWriting(false);
     setVoiceText(null);
   };
 
   // ── Edit ────────────────────────────────────────────────────
   const handleEditSave = (updatedEntry) => {
-    queryClient.setQueryData(["entries"], (old = []) =>
-      old.map((e) => (e.id === updatedEntry.id ? updatedEntry : e))
-    );
+    updateEntry(updatedEntry);
     setEditingEntry(null);
   };
 
@@ -169,9 +139,7 @@ export default function Home() {
   const handleDeleteConfirm = () => {
     const entry = deletingEntry;
     setDeletingEntry(null);
-    queryClient.setQueryData(["entries"], (old = []) =>
-      old.filter((e) => e.id !== entry.id)
-    );
+    removeEntry(entry.id);
     setUndoEntry(entry);
     clearTimeout(undoTimerRef.current);
     undoTimerRef.current = setTimeout(async () => {
@@ -179,9 +147,7 @@ export default function Home() {
       try {
         await base44.entities.Entry.delete(entry.id);
       } catch {
-        queryClient.setQueryData(["entries"], (old = []) =>
-          [entry, ...old].sort((a, b) => new Date(b.created_date) - new Date(a.created_date))
-        );
+        restoreEntry(entry);
       }
     }, 5000);
   };
@@ -190,9 +156,7 @@ export default function Home() {
     clearTimeout(undoTimerRef.current);
     const entry = undoEntry;
     setUndoEntry(null);
-    queryClient.setQueryData(["entries"], (old = []) =>
-      [entry, ...old].sort((a, b) => new Date(b.created_date) - new Date(a.created_date))
-    );
+    restoreEntry(entry);
   };
 
   // Voice entry is open when voiceText is non-null (including empty string)
@@ -246,24 +210,11 @@ export default function Home() {
                 categoryByKey={categoryByKey}
               />
             ))}
-            {hasMore && (
-              <div className="px-4 py-6 flex justify-center">
-                <button
-                  onClick={handleLoadMore}
-                  disabled={loadingMore}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-full border border-border text-sm font-body font-medium text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50"
-                >
-                  {loadingMore ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Loading…
-                    </>
-                  ) : (
-                    "Load earlier entries"
-                  )}
-                </button>
-              </div>
-            )}
+            <InfiniteScrollSentinel
+              onIntersect={fetchNextPage}
+              loading={isFetchingMore}
+              hasMore={hasMore}
+            />
           </div>
         )}
       </main>
