@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, Plus, X, Trash2, Link as LinkIcon, Sun, Moon, Heart, Zap, Wind, Cloud, Briefcase, Users, User, HeartPulse, BookOpen, Home, TreePine, Plane, Lightbulb, Mountain, Star, Crosshair, UtensilsCrossed, GlassWater, Coffee, Waves, Umbrella, Compass, Sailboat, MapPin, Ticket, Leaf, Trees, ShoppingBag, Film, Music, Landmark, Sparkles } from "lucide-react";
+import { Loader2, Plus, X, Trash2, Link as LinkIcon, Sun, Moon, Heart, Zap, Wind, Cloud, Briefcase, Users, User, HeartPulse, BookOpen, Home, TreePine, Plane, Lightbulb, Mountain, Star, Crosshair, UtensilsCrossed, GlassWater, Coffee, Waves, Umbrella, Compass, Sailboat, MapPin, Ticket, Leaf, Trees, ShoppingBag, Film, Music, Landmark, Sparkles, ChefHat } from "lucide-react";
 
 const ICON_MAP = {
   "sun": Sun, "moon": Moon, "heart": Heart, "zap": Zap, "wind": Wind, "cloud": Cloud,
@@ -13,6 +13,7 @@ const ICON_MAP = {
   "map-pin": MapPin, "ticket": Ticket, "leaf": Leaf, "trees": Trees,
   "shopping-bag": ShoppingBag, "film": Film, "music": Music, "landmark": Landmark,
   "sparkles": Sparkles,
+  "chef-hat": ChefHat,
 };
 import { useTagCatalog } from "@/hooks/useTagCatalog";
 import { useMediaUploader } from "@/hooks/useMediaUploader";

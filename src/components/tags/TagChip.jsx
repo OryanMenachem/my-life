@@ -4,7 +4,7 @@ import {
   Home, TreePine, Plane, Lightbulb, Mountain, Star, Crosshair,
   UtensilsCrossed, GlassWater, Coffee, Waves, Umbrella, Compass,
   Sailboat, MapPin, Ticket, Leaf, Trees, ShoppingBag, Film, Music,
-  Landmark, Sparkles,
+  Landmark, Sparkles, ChefHat,
 } from "lucide-react";
 
 const ICON_MAP = {
@@ -18,6 +18,7 @@ const ICON_MAP = {
   "map-pin": MapPin, ticket: Ticket, leaf: Leaf, trees: Trees,
   "shopping-bag": ShoppingBag, film: Film, music: Music, landmark: Landmark,
   sparkles: Sparkles,
+  "chef-hat": ChefHat,
 };
 
 export default function TagChip({ tag, categoryColor }) {
